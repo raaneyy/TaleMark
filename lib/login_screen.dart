@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
+import 'app_theme.dart';
+import 'widgets/auth_widgets.dart';
+import 'widgets/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key}); // Konstruktor gaya baru
@@ -29,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SafeArea(
         // Perbaikan 1: Membungkus dengan SingleChildScrollView
         child: SingleChildScrollView( 
@@ -39,26 +43,26 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               // mainAxisAlignment: MainAxisAlignment.center dihapus karena di dalam scroll
               children: <Widget>[
-                const SizedBox(height: 60), // Memberi sedikit jarak dari atas karena tidak di-center lagi
-                const Text(
+                const SizedBox(height: 40),
+                Text(
                   'Masuk',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  style: AppTheme.serif(size: 34),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Lanjutkan ritme membaca yang tenang.',
+                  style: TextStyle(fontSize: 14, color: AppTheme.muted),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
 
+                const FieldLabel('EMAIL', small: true),
+                const SizedBox(height: 8),
                 TextFormField(
-                  controller: _emailController, // Memasang controller
-                  decoration: const InputDecoration(
-                    labelText: 'EMAIL',
-                    hintText: 'nama@pustaka.com',
-                    // border dihapus, sudah diurus tema
-                  ),
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(hintText: 'nama@pustaka.com'),
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
                       return 'Email tidak boleh kosong';
@@ -66,17 +70,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const FieldLabel('KATA SANDI', small: true),
+                    GestureDetector(
+                      onTap: () => showForgotPasswordDialog(context),
+                      child: const Text(
+                        'Lupa?',
+                        style: TextStyle(fontSize: 12, color: AppTheme.muted),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
-                  controller: _passwordController, // Memasang controller
-                  obscureText: _obscure, // Menggunakan state visibilitas
-                  decoration: InputDecoration( // Hapus const di sini karena isinya dinamis
-                    labelText: 'KATA SANDI',
+                  controller: _passwordController,
+                  obscureText: _obscure,
+                  decoration: InputDecoration(
                     hintText: '••••••••',
-                    // Ikon mata yang bisa ditekan
                     suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(_obscure
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -87,28 +105,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
 
                 ElevatedButton(
-                  // style ElevatedButton dihapus, sudah diurus tema
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      // Cara memakai data controller saat login ditekan
                       final email = _emailController.text.trim();
                       final password = _passwordController.text;
                       // TODO: Lakukan proses login di sini menggunakan email & password
                     }
                   },
-                  child: const Text('Masuk'), // Warna putih diurus tema
+                  child: const Text('Masuk'),
                 ),
-                
-                const SizedBox(height: 20),
-                
+                const SizedBox(height: 24),
+
+                const OrDivider('ATAU'),
+                const SizedBox(height: 24),
+
+                GoogleButton(
+                  onPressed: () {
+                    // TODO: login dengan Google
+                  },
+                ),
+                const SizedBox(height: 40),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Belum punya akun? '),
-                    // Perbaikan: Mengganti GestureDetector dengan TextButton
+                    const Text(
+                      'Belum punya akun?',
+                      style: TextStyle(fontSize: 13, color: AppTheme.muted),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -118,7 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: const Text(
                         'Buat akun',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'app_theme.dart';
+import 'widgets/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key}); // Konstruktor gaya baru
@@ -17,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Variabel untuk visibilitas sandi
   bool _obscure = true;
+  bool _hasMinLength = false;
 
   @override
   void dispose() {
@@ -29,11 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+    appBar: AppBar(),
       body: SafeArea(
         child: SingleChildScrollView( 
           child: Container(
@@ -43,73 +42,114 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const Icon(Icons.menu_book, size: 60), 
-                  const SizedBox(height: 16),
-                  const Text(
+                  Image.asset(
+                    'assets/images/logo_talemark.png',
+                    height: 110,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
                     'Start your reading tracker',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: AppTheme.serif(size: 28),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
+                  const FieldLabel('Nama Panggilan Pembaca'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
-                      labelText: 'Nama Panggilan Pembaca',
                       hintText: 'Misal: Leila Chudori',
-                      prefixIcon: Icon(Icons.person_outline),
+                      hintStyle: TextStyle(fontSize: 14, color: Color(0xFFC4C4C2)),
+                      prefixIcon: Icon(Icons.edit_note),
                     ),
                     validator: (String? value) {
                       if (value == null || value.isEmpty) return 'Nama tidak boleh kosong';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
+                  const FieldLabel('Alamat Email'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Alamat Email',
                       hintText: 'nama@domain.com',
+                      hintStyle: TextStyle(fontSize: 14, color: Color(0xFFC4C4C2)),
                       prefixIcon: Icon(Icons.alternate_email),
                     ),
-                    // Perbaikan validasi email yang lebih lengkap
                     validator: (String? value) {
                       if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
                       if (!value.contains('@')) return 'Format email tidak valid';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
+                  const FieldLabel('Kata Sandi'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: _obscure, // Menggunakan state visibilitas
-                    decoration: InputDecoration( // const dihapus karena isinya dinamis
-                      labelText: 'Kata Sandi',
+                    obscureText: _obscure,
+                    onChanged: (value) =>
+                        setState(() => _hasMinLength = value.length >= 8),
+                    decoration: InputDecoration(
                       hintText: 'Minimal 8 karakter rahasia',
+                      hintStyle:
+                          const TextStyle(fontSize: 14, color: Color(0xFFC4C4C2)),
                       prefixIcon: const Icon(Icons.lock_outline),
-                      // Ikon mata yang bisa ditekan
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                        icon: Icon(_obscure
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
-                    // Perbaikan validasi sandi
                     validator: (String? value) {
                       if (value == null || value.isEmpty) return 'Kata sandi tidak boleh kosong';
                       if (value.length < 8) return 'Minimal 8 karakter';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 8),
+
+                  PasswordRequirement(met: _hasMinLength),
+                  const SizedBox(height: 20),
+
+                  const Text.rich(
+                    TextSpan(
+                      style: TextStyle(fontSize: 12, color: AppTheme.muted, height: 1.5),
+                      children: [
+                        TextSpan(text: 'Dengan mendaftar, Anda menyetujui '),
+                        TextSpan(
+                          text: 'Ketentuan Layanan',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(text: ' & '),
+                        TextSpan(
+                          text: 'Kebijakan Privasi',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(text: ' TaleMark.'),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
 
                   ElevatedButton(
-                    // style dihapus karena sudah diurus tema
                     onPressed: () {
-                      // Validasi dipanggil dari objek FormState
-                      if (formKey.currentState!.validate()) { 
-                        // Proses registrasi
+                      if (formKey.currentState!.validate()) {
                         final name = _nameController.text.trim();
                         final email = _emailController.text.trim();
                         final password = _passwordController.text;
@@ -117,6 +157,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                     },
                     child: const Text('Buat Akun TaleMark →'),
+                  ),
+                  const SizedBox(height: 20),
+
+                  const OrDivider('ATAU DAFTAR DENGAN'),
+                  const SizedBox(height: 20),
+
+                  GoogleButton(
+                    onPressed: () {
+                      // TODO: daftar dengan Google
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Sudah memiliki akun? ',
+                        style: TextStyle(fontSize: 13, color: AppTheme.muted),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Text(
+                          'Masuk›',
+                          style: AppTheme.serif(size: 18).copyWith(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
