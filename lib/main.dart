@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'app_theme.dart'; // Import tema yang baru dibuat
-import 'login_screen.dart'; // Halaman login
+import 'splash_screen.dart'; // Splash screen
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TaleMark',
       theme: AppTheme.light, // Menggunakan tema dari app_theme.dart
-      home: const LoginScreen(),
+      home: const SplashScreen(), // Mulai dari splash screen
       debugShowCheckedModeBanner: false,
     );
   }

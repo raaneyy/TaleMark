@@ -55,6 +55,7 @@ flutter:
   assets:
     - assets/images/logo_talemark.png
     - assets/images/google_logo.png
+    - assets/images/talemark_logo.jpg
 
   fonts:
     - family: Inter
@@ -65,11 +66,6 @@ flutter:
     - family: Newsreader
       fonts:
         - asset: assets/fonts/Newsreader-Regular.ttf
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
