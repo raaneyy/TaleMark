@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 1900),
     );
 
     _fadeAnim = CurvedAnimation(
@@ -80,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: Transform.scale(
                 scale: _scaleAnim.value,
                 child: Image.asset(
-                  'assets/images/talemark_logo.jpg',
+                  'assets/images/logo_talemark.png',
                   width: 240,
                 ),
               ),
