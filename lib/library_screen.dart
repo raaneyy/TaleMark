@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'book_detail_screen.dart';
 
+void main() {
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: LibraryScreen(),
+  ));
+}
+
 // Model data buku
 class BookModel {
   final String title;
