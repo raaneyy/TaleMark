@@ -152,7 +152,7 @@ class _ProfileCard extends StatelessWidget {
                       _kName,
                       style: TextStyle(
                         fontFamily: _kSerif,
-                        fontSize: 28,
+                        fontSize: 22, // was 28
                         fontWeight: FontWeight.w500,
                         color: _kInk,
                         height: 1.1,
@@ -163,7 +163,7 @@ class _ProfileCard extends StatelessWidget {
                       _kHandle,
                       style: TextStyle(
                         fontFamily: _kSans,
-                        fontSize: 14,
+                        fontSize: 12.5, // was 14
                         color: _kMuted,
                       ),
                     ),
@@ -177,7 +177,7 @@ class _ProfileCard extends StatelessWidget {
                     onPressed: () {},
                     icon: const Icon(
                       Icons.notifications_none_rounded,
-                      size: 26,
+                      size: 22, // was 26
                       color: _kBody,
                     ),
                   ),
@@ -197,7 +197,11 @@ class _ProfileCard extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.tune_rounded, size: 26, color: _kBody),
+                icon: const Icon(
+                  Icons.tune_rounded,
+                  size: 22, // was 26
+                  color: _kBody,
+                ),
               ),
             ],
           ),
@@ -206,7 +210,7 @@ class _ProfileCard extends StatelessWidget {
             _kBio,
             style: TextStyle(
               fontFamily: _kSans,
-              fontSize: 16,
+              fontSize: 14, // was 16
               height: 1.6,
               color: _kBody,
             ),
@@ -252,7 +256,7 @@ class _Stat extends StatelessWidget {
           value,
           style: const TextStyle(
             fontFamily: _kSerif,
-            fontSize: 26,
+            fontSize: 20, // was 26
             fontWeight: FontWeight.w500,
             color: _kInk,
           ),
@@ -262,7 +266,7 @@ class _Stat extends StatelessWidget {
           label,
           style: const TextStyle(
             fontFamily: _kSans,
-            fontSize: 12,
+            fontSize: 10.5, // was 12
             fontWeight: FontWeight.w500,
             letterSpacing: 1.0,
             color: _kBody,
@@ -364,13 +368,17 @@ class _FeedTab extends StatelessWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.dynamic_feed_outlined, size: 20, color: _kBody),
+            Icon(
+              Icons.dynamic_feed_outlined,
+              size: 18,
+              color: _kBody,
+            ), // was 20
             SizedBox(width: 22),
             Text(
               'My Feed',
               style: TextStyle(
                 fontFamily: _kSans,
-                fontSize: 16,
+                fontSize: 14, // was 16
                 fontWeight: FontWeight.w500,
                 color: _kInk,
               ),
@@ -428,7 +436,7 @@ class _FeedCardState extends State<_FeedCard> {
                       TextSpan(
                         style: const TextStyle(
                           fontFamily: _kSans,
-                          fontSize: 16,
+                          fontSize: 14, // was 16
                           color: _kInk,
                         ),
                         children: [
@@ -449,7 +457,7 @@ class _FeedCardState extends State<_FeedCard> {
                       '${post.time} · ${post.detail}',
                       style: const TextStyle(
                         fontFamily: _kSans,
-                        fontSize: 13,
+                        fontSize: 11.5, // was 13
                         fontWeight: FontWeight.w500,
                         color: _kBody,
                       ),
@@ -493,7 +501,7 @@ class _FeedCardState extends State<_FeedCard> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: _kSerif,
-                        fontSize: 22,
+                        fontSize: 18, // was 22
                         fontWeight: FontWeight.w500,
                         color: _kInk,
                       ),
@@ -505,7 +513,7 @@ class _FeedCardState extends State<_FeedCard> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: _kSans,
-                        fontSize: 14,
+                        fontSize: 12.5, // was 14
                         color: _kMuted,
                       ),
                     ),
@@ -519,7 +527,7 @@ class _FeedCardState extends State<_FeedCard> {
                                 : (i < post.rating
                                       ? Icons.star_half_rounded
                                       : Icons.star_border_rounded),
-                            size: 18,
+                            size: 16, // was 18
                             color: _kInk,
                           ),
                         const SizedBox(width: 10),
@@ -527,7 +535,7 @@ class _FeedCardState extends State<_FeedCard> {
                           post.rating.toStringAsFixed(1),
                           style: const TextStyle(
                             fontFamily: _kSans,
-                            fontSize: 13,
+                            fontSize: 12, // was 13
                             fontWeight: FontWeight.w500,
                             color: _kBody,
                           ),
@@ -546,7 +554,7 @@ class _FeedCardState extends State<_FeedCard> {
         '\u201C${post.text}\u201D',
         style: const TextStyle(
           fontFamily: _kSans,
-          fontSize: 16,
+          fontSize: 14, // was 16
           height: 1.6,
           color: _kBody,
         ),
@@ -599,7 +607,7 @@ class _FeedCardState extends State<_FeedCard> {
           children: [
             Row(
               children: [
-                const Icon(Icons.menu_book_outlined, size: 18, color: _kBody),
+                const Icon(Icons.menu_book_outlined, size: 16, color: _kBody),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -608,7 +616,7 @@ class _FeedCardState extends State<_FeedCard> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: _kSans,
-                      fontSize: 12,
+                      fontSize: 10.5, // was 12
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.6,
                       color: _kBody,
@@ -624,7 +632,7 @@ class _FeedCardState extends State<_FeedCard> {
                       _saved
                           ? Icons.bookmark_rounded
                           : Icons.bookmark_border_rounded,
-                      size: 22,
+                      size: 20,
                       color: _kInk,
                     ),
                   ),
@@ -636,7 +644,7 @@ class _FeedCardState extends State<_FeedCard> {
               '\u201C${post.text}\u201D',
               style: const TextStyle(
                 fontFamily: _kSerif,
-                fontSize: 28,
+                fontSize: 22, // was 28
                 height: 1.4,
                 color: _kInk,
               ),
@@ -647,7 +655,7 @@ class _FeedCardState extends State<_FeedCard> {
                 'Marginalia Note: \u201C${post.marginalia}\u201D',
                 style: const TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 13,
+                  fontSize: 12, // was 13
                   fontWeight: FontWeight.w500,
                   height: 1.4,
                   color: _kBody,
@@ -715,14 +723,14 @@ class _ActionButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 24, color: _kBody),
+            Icon(icon, size: 22, color: _kBody), // was 24
             if (label != null) ...[
               const SizedBox(width: 8),
               Text(
                 label!,
                 style: const TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 15,
+                  fontSize: 13, // was 15
                   fontWeight: FontWeight.w600,
                   color: _kBody,
                 ),
@@ -775,7 +783,7 @@ class _BottomNav extends StatelessWidget {
                       children: [
                         Icon(
                           i == currentIndex ? _items[i].$2 : _items[i].$1,
-                          size: 24,
+                          size: 22, // was 24
                           color: i == currentIndex ? _kInk : _kMuted,
                         ),
                         const SizedBox(height: 4),
@@ -783,7 +791,7 @@ class _BottomNav extends StatelessWidget {
                           _items[i].$3,
                           style: TextStyle(
                             fontFamily: _kSans,
-                            fontSize: 11,
+                            fontSize: 10, // was 11
                             fontWeight: i == currentIndex
                                 ? FontWeight.w700
                                 : FontWeight.w500,
