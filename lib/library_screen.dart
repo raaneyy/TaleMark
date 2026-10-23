@@ -208,7 +208,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(
-                  'assets/images/logo.png',
+                  'assets/images/logo_talemark.png',
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.auto_stories_rounded,
