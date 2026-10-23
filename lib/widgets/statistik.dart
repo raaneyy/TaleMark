@@ -170,8 +170,10 @@ class _Brand extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
           ),
+          padding: const EdgeInsets.all(4),
           child: Image.asset(
-            'assets/images/logo.png',
+            'assets/images/logo_talemark.png',
+            fit: BoxFit.contain,
             errorBuilder: (_, __, ___) =>
                 const Icon(Icons.auto_stories_outlined, size: 20, color: _kInk),
           ),
@@ -182,7 +184,7 @@ class _Brand extends StatelessWidget {
           style: TextStyle(
             fontFamily: _kSerif,
             fontSize: 22,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w700, // bold
             color: _kInk,
           ),
         ),
