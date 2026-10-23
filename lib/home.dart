@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'scan_book_page.dart';
 
 void main() => runApp(const TaleMarkApp());
 
@@ -111,6 +112,22 @@ class _HomeScreenState extends State<HomeScreen> {
   void _toggleMenu() => setState(() => _menuOpen = !_menuOpen);
   void _closeMenu() => setState(() => _menuOpen = false);
 
+  Future<void> _openScanner() async {
+    _closeMenu();
+    final result = await Navigator.push<ScannedBook>(
+      context,
+      MaterialPageRoute(builder: (_) => const ScanBookPage()),
+    );
+    if (result != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Buku "${result.title}" berhasil dipindai & disimpan!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   void _onAddBook() {
     _closeMenu();
     // TODO: arahkan ke halaman Tambah Buku, mis.
@@ -167,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _menuItem(Icons.qr_code_scanner, 'Scan Barcode', _openScanner),
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
                 ],
@@ -189,11 +207,11 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.only(bottom: 90),
               children: [
                 const _Header(),
-                const _SearchBar(),
+                _SearchBar(onScan: _openScanner),
                 const SizedBox(height: 10),
                 _buildChips(),
                 const SizedBox(height: 14),
-                const _ScanCard(),
+                _ScanCard(onTap: _openScanner),
                 const SizedBox(height: 20),
                 const _SectionTitle(eyebrow: 'SELECTED EDITION', title: 'Recommendation'),
                 const SizedBox(height: 10),
@@ -375,7 +393,8 @@ class _Header extends StatelessWidget {
 }
 
 class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+  final VoidCallback? onScan;
+  const _SearchBar({this.onScan});
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +433,12 @@ class _SearchBar extends StatelessWidget {
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
-                onPressed: () {},
+                tooltip: 'Scan Barcode',
+                onPressed: onScan ??
+                    () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ScanBookPage()),
+                        ),
                 icon: const Icon(Icons.qr_code_scanner, size: 20),
               ),
             ),
@@ -428,31 +452,60 @@ class _SearchBar extends StatelessWidget {
 // ───────────────────────── Scan Card ─────────────────────────
 
 class _ScanCard extends StatelessWidget {
-  const _ScanCard();
+  final VoidCallback? onTap;
+  const _ScanCard({this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12)),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Icon(Icons.photo_camera_outlined, size: 18),
-              SizedBox(width: 6),
-              Text('INSTANT SHELF SCAN',
-                  style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 11)),
-            ]),
-            SizedBox(height: 6),
-            Text('Scan any book spine or barcode to log in seconds.',
-                style: TextStyle(fontFamily: kSerif, fontSize: 15, fontWeight: FontWeight.w600, height: 1.25)),
-            SizedBox(height: 4),
-            Text('Autofills publication date, page count, and editions.',
-                style: TextStyle(color: kMuted, fontSize: 12)),
-          ],
+      child: Material(
+        color: kCard,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap ??
+              () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ScanBookPage()),
+                  ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Icon(Icons.photo_camera_outlined, size: 18, color: kInk),
+                        const SizedBox(width: 6),
+                        const Text('INSTANT SHELF SCAN',
+                            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 11)),
+                      ]),
+                      const SizedBox(height: 6),
+                      const Text('Scan any book spine or barcode to log in seconds.',
+                          style: TextStyle(fontFamily: kSerif, fontSize: 15, fontWeight: FontWeight.w600, height: 1.25)),
+                      const SizedBox(height: 4),
+                      const Text('Autofills publication date, page count, and editions.',
+                          style: TextStyle(color: kMuted, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: kChip,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.qr_code_scanner, size: 20, color: kInk),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

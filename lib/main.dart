@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart'; // Import tema yang baru dibuat
 import 'splash_screen.dart'; // Splash screen
 
+
 void main() {
   runApp(const MyApp());
 }

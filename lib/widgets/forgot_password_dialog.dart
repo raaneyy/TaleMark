@@ -60,7 +60,6 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       // TODO: verifikasi kode dari _codeController.text
       setState(() => _step = 2);
     } else {
-      // TODO: ubah kata sandi dengan _newPasswordController.text
       final messenger = ScaffoldMessenger.of(context);
       Navigator.pop(context);
       messenger.showSnackBar(
