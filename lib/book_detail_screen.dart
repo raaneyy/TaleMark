@@ -26,6 +26,32 @@ Color _resolveCoverColor(BookModel book) {
   return const Color(0xFF1F3A5F);
 }
 
+void main() => runApp(const BookDetailScreenApp());
+
+class BookDetailScreenApp extends StatelessWidget {
+  const BookDetailScreenApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: AppTheme.light,
+      home: BookDetailScreen(
+        book: BookModel(
+          title: 'The Little Prince',
+          author: 'Antoine de Saint-Exupéry',
+          genre: 'Fiksi',
+          description:
+              'Sebuah kisah tentang persahabatan, perjalanan, dan cara melihat dunia.',
+          totalPages: 96,
+          currentPage: 0,
+          progress: 0,
+          coverColor: const Color(0xFF5B6C8F),
+        ),
+      ),
+    );
+  }
+}
+
 class BookDetailScreen extends StatelessWidget {
   final BookModel book;
 

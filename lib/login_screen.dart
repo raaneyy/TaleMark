@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tale_mark/home.dart';
 import 'register_screen.dart';
 import 'app_theme.dart';
 import 'widgets/auth_widgets.dart';
@@ -112,7 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (formKey.currentState!.validate()) {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text;
-                      // TODO: Lakukan proses login di sini menggunakan email & password
+                      
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      );
                     }
                   },
                   child: const Text('Masuk'),

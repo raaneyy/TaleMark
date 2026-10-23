@@ -105,48 +105,141 @@ class _HomeScreenState extends State<HomeScreen> {
   int _chip = 0;
   final _chips = const ['All', 'Fiction', 'Philosophy', 'Sci-Fi'];
 
+  // ── state pop up tombol + ──
+  bool _menuOpen = false;
+
+  void _toggleMenu() => setState(() => _menuOpen = !_menuOpen);
+  void _closeMenu() => setState(() => _menuOpen = false);
+
+  void _onAddBook() {
+    _closeMenu();
+    // TODO: arahkan ke halaman Tambah Buku, mis.
+    // Navigator.push(context, MaterialPageRoute(builder: (_) => const AddBookPage()));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Add Book dipilih')));
+  }
+
+  void _onSetTimer() {
+    _closeMenu();
+    // TODO: arahkan ke halaman Pomodoro / Set Timer
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Set Timer dipilih')));
+  }
+
+  Widget _menuItem(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFabMenu() {
+    return IgnorePointer(
+      ignoring: !_menuOpen,
+      child: AnimatedScale(
+        scale: _menuOpen ? 1 : 0.6,
+        alignment: Alignment.bottomRight,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        child: AnimatedOpacity(
+          opacity: _menuOpen ? 1 : 0,
+          duration: const Duration(milliseconds: 160),
+          child: Material(
+            color: kInk,
+            elevation: 6,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _menuItem(Icons.book, 'Add Book', _onAddBook),
+                  _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 90),
-          children: [
-            const _Header(),
-            const _SearchBar(),
-            const SizedBox(height: 10),
-            _buildChips(),
-            const SizedBox(height: 14),
-            const _ScanCard(),
-            const SizedBox(height: 20),
-            const _SectionTitle(eyebrow: 'SELECTED EDITION', title: 'Recommendation'),
-            const SizedBox(height: 10),
-            const _FeaturedCard(),
-            const SizedBox(height: 22),
-            const SizedBox(height: 10),
-            _buildAffinityList(),
-            const SizedBox(height: 22),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Trending Now',
-                  style: TextStyle(fontFamily: kSerif, fontSize: 20, fontWeight: FontWeight.w600)),
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 90),
+              children: [
+                const _Header(),
+                const _SearchBar(),
+                const SizedBox(height: 10),
+                _buildChips(),
+                const SizedBox(height: 14),
+                const _ScanCard(),
+                const SizedBox(height: 20),
+                const _SectionTitle(eyebrow: 'SELECTED EDITION', title: 'Recommendation'),
+                const SizedBox(height: 10),
+                const _FeaturedCard(),
+                const SizedBox(height: 22),
+                const SizedBox(height: 10),
+                _buildAffinityList(),
+                const SizedBox(height: 22),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Text('Trending Now',
+                      style: TextStyle(
+                          fontFamily: kSerif, fontSize: 20, fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(height: 10),
+                for (final b in trending) _TrendingTile(book: b),
+              ],
             ),
-            const SizedBox(height: 10),
-            for (final b in trending) _TrendingTile(book: b),
-          ],
-        ),
+          ),
+          // area transparan: tap di luar menu untuk menutup
+          if (_menuOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _closeMenu,
+                child: const SizedBox.expand(),
+              ),
+            ),
+          // menu pop up di atas tombol + (FAB 50 + margin 16 + jarak 8)
+          Positioned(right: 16, bottom: 16 + 50 + 8, child: _buildFabMenu()),
+        ],
       ),
       floatingActionButton: SizedBox(
         width: 50,
         height: 50,
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: _toggleMenu,
           backgroundColor: kInk,
           foregroundColor: Colors.white,
           elevation: 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          child: const Icon(Icons.add, size: 24),
+          child: AnimatedRotation(
+            turns: _menuOpen ? 0.125 : 0, // + berputar jadi ×
+            duration: const Duration(milliseconds: 160),
+            child: const Icon(Icons.add, size: 24),
+          ),
         ),
       ),
       bottomNavigationBar: NavigationBar(

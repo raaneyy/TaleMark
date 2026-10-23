@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tale_mark/main.dart';
 import 'app_theme.dart';
 import 'login_screen.dart';
+
+void main() => runApp(const AccountScreen());
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});

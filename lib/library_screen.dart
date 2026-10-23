@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'book_detail_screen.dart';
 
+<<<<<<< HEAD
 // ─────────────────────── Shared constants ───────────────────────
 const _kBg = Color(0xFFF7F7F5);
 const _kCard = Colors.white;
@@ -10,6 +11,16 @@ const _kChip = Color(0xFFEDEDF0);
 const _kSerif = 'Georgia';
 
 // ─────────────────────── Book Model ───────────────────────
+=======
+void main() {
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: LibraryScreen(),
+  ));
+}
+
+// Model data buku
+>>>>>>> eef0dbd3401b6719c950b641ae73f265e0401fed
 class BookModel {
   final String title;
   final String author;
