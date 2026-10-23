@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
-import 'app_theme.dart';
-import 'library_screen.dart';
+import 'library_screen.dart'; // pastikan BookModel didefinisikan di file ini
+
+// Warna teks redup (lokal, supaya tidak error "not a constant expression")
+const Color _muted = Color(0xFF8A8A86);
+
+/// Mengambil warna cover dari BookModel tanpa bergantung pada satu nama field.
+/// Mencoba beberapa nama umum; kalau tidak ada yang cocok, pakai warna default.
+/// Kalau sudah tahu nama field aslinya, ganti isi fungsi ini dengan
+/// `return book.namaFieldAnda;`
+Color _resolveCoverColor(BookModel book) {
+  final dynamic b = book;
+  final List<Color Function()> candidates = [
+    () => b.color as Color,
+    () => b.cover as Color,
+    () => b.bgColor as Color,
+    () => b.backgroundColor as Color,
+  ];
+  for (final getColor in candidates) {
+    try {
+      return getColor();
+    } catch (_) {
+      // field tidak ada / bukan Color, coba kandidat berikutnya
+    }
+  }
+  return const Color(0xFF1F3A5F);
+}
 
 class BookDetailScreen extends StatelessWidget {
   final BookModel book;
@@ -9,6 +33,12 @@ class BookDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pastikan progress selalu double antara 0.0 - 1.0
+    final double progress = book.progress.toDouble().clamp(0.0, 1.0).toDouble();
+    final bool isDone = progress >= 1.0;
+    final bool notStarted = progress == 0.0;
+    final Color coverColor = _resolveCoverColor(book);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F7),
       body: CustomScrollView(
@@ -17,7 +47,8 @@ class BookDetailScreen extends StatelessWidget {
           SliverAppBar(
             expandedHeight: 340,
             pinned: true,
-            backgroundColor: book.coverColor,
+            backgroundColor: coverColor,
+            automaticallyImplyLeading: false,
             leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Container(
@@ -26,8 +57,11 @@ class BookDetailScreen extends StatelessWidget {
                   color: Colors.black.withAlpha(40),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.arrow_back_rounded,
-                    color: Colors.white, size: 20),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
             ),
             actions: [
@@ -38,8 +72,11 @@ class BookDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.more_horiz_rounded,
-                      color: Colors.white, size: 20),
+                  icon: const Icon(
+                    Icons.more_horiz_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                   onPressed: () {},
                 ),
               ),
@@ -48,10 +85,10 @@ class BookDetailScreen extends StatelessWidget {
               background: Hero(
                 tag: 'book-${book.title}',
                 child: Container(
-                  color: book.coverColor,
+                  color: coverColor,
                   child: Stack(
                     children: [
-                      // Decorative pattern
+                      // Pola dekoratif
                       ...List.generate(5, (i) {
                         return Positioned(
                           top: -20 + (i * 60.0),
@@ -69,17 +106,20 @@ class BookDetailScreen extends StatelessWidget {
                           ),
                         );
                       }),
-                      // Content
+                      // Konten
                       Positioned(
                         bottom: 40,
                         left: 32,
                         right: 32,
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withAlpha(25),
                                 borderRadius: BorderRadius.circular(4),
@@ -95,22 +135,28 @@ class BookDetailScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(
-                              book.title,
-                              style: const TextStyle(
-                                fontFamily: 'Newsreader',
-                                fontSize: 30,
-                                color: Colors.white,
-                                height: 1.2,
+                            Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                book.title,
+                                style: const TextStyle(
+                                  fontFamily: 'Newsreader',
+                                  fontSize: 30,
+                                  color: Colors.white,
+                                  height: 1.2,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              book.author,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                color: Colors.white.withAlpha(180),
+                            Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                book.author,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14,
+                                  color: Colors.white.withAlpha(180),
+                                ),
                               ),
                             ),
                           ],
@@ -130,7 +176,7 @@ class BookDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Progress Card
+                  // Kartu progres
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -150,25 +196,17 @@ class BookDetailScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'PROGRES MEMBACA',
-                              style: TextStyle(
-                                fontSize: 11,
-                                letterSpacing: 0.8,
-                                color: AppTheme.muted,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                            const _SectionLabel('PROGRES MEMBACA'),
                             Text(
-                              book.progress >= 1.0
+                              isDone
                                   ? 'Selesai ✓'
-                                  : book.progress == 0
+                                  : notStarted
                                       ? 'Belum dibaca'
-                                      : '${(book.progress * 100).round()}%',
+                                      : '${(progress * 100).round()}%',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: book.progress >= 1.0
+                                color: isDone
                                     ? const Color(0xFF2D7D32)
                                     : Colors.black,
                               ),
@@ -179,12 +217,10 @@ class BookDetailScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
-                            value: book.progress,
+                            value: progress,
                             backgroundColor: const Color(0xFFF1F1EF),
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              book.progress >= 1.0
-                                  ? const Color(0xFF2D7D32)
-                                  : Colors.black,
+                              isDone ? const Color(0xFF2D7D32) : Colors.black,
                             ),
                             minHeight: 6,
                           ),
@@ -203,8 +239,8 @@ class BookDetailScreen extends StatelessWidget {
                             ),
                             _StatChip(
                               label: 'Tersisa',
-                              value:
-                                  (book.totalPages - book.currentPage).toString(),
+                              value: (book.totalPages - book.currentPage)
+                                  .toString(),
                             ),
                           ],
                         ),
@@ -221,9 +257,9 @@ class BookDetailScreen extends StatelessWidget {
                           onPressed: () {},
                           icon: const Icon(Icons.menu_book_rounded, size: 16),
                           label: Text(
-                            book.progress == 0
+                            notStarted
                                 ? 'Mulai Membaca'
-                                : book.progress >= 1.0
+                                : isDone
                                     ? 'Baca Ulang'
                                     : 'Lanjut Membaca',
                           ),
@@ -249,8 +285,10 @@ class BookDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.bookmark_border_rounded,
-                              size: 20),
+                          icon: const Icon(
+                            Icons.bookmark_border_rounded,
+                            size: 20,
+                          ),
                           onPressed: () {},
                           color: Colors.black,
                         ),
@@ -260,15 +298,7 @@ class BookDetailScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Sinopsis
-                  const Text(
-                    'SINOPSIS',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 0.8,
-                      color: AppTheme.muted,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  const _SectionLabel('SINOPSIS'),
                   const SizedBox(height: 10),
                   Text(
                     book.description,
@@ -281,26 +311,39 @@ class BookDetailScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Informasi buku
-                  const Text(
-                    'INFORMASI BUKU',
-                    style: TextStyle(
-                      fontSize: 11,
-                      letterSpacing: 0.8,
-                      color: AppTheme.muted,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  const _SectionLabel('INFORMASI BUKU'),
                   const SizedBox(height: 10),
                   _InfoRow(label: 'Penulis', value: book.author),
                   _InfoRow(label: 'Genre', value: book.genre),
                   _InfoRow(
-                      label: 'Total Halaman', value: '${book.totalPages} hal.'),
+                    label: 'Total Halaman',
+                    value: '${book.totalPages} hal.',
+                  ),
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        letterSpacing: 0.8,
+        color: _muted,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -327,7 +370,7 @@ class _StatChip extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(fontSize: 11, color: AppTheme.muted),
+          style: const TextStyle(fontSize: 11, color: _muted),
         ),
       ],
     );
@@ -349,14 +392,17 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 13, color: AppTheme.muted),
+            style: const TextStyle(fontSize: 13, color: _muted),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
             ),
           ),
         ],

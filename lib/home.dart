@@ -371,7 +371,7 @@ class _ScanCard extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final String eyebrow, title;
   final bool small;
-  const _SectionTitle({required this.eyebrow, required this.title, this.small = false});
+  const _SectionTitle({required this.eyebrow, required this.title}) : small = false;
 
   @override
   Widget build(BuildContext context) {
