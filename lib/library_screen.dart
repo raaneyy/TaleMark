@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'book_detail_screen.dart';
 
-// ─────────────────────── Shared constants ───────────────────────
-const _kBg = Color(0xFFF7F7F5);
+// ─────────────────────── Konstanta desain ───────────────────────
+const _kBg = Color(0xFFFAFAF8);
 const _kCard = Colors.white;
 const _kInk = Color(0xFF111111);
-const _kMuted = Color(0xFF6B6B6B);
-const _kChip = Color(0xFFEDEDF0);
-const _kSerif = 'Georgia';
+const _kMuted = Color(0xFF8A8A86);
+const _kTrack = Color(0xFFF1F1EF); // latar tab & chip tidak aktif
+const _kBanner = Color(0xFFF1EEE9); // latar banner beige
+const _kSerif = 'Newsreader';
+const _kSans = 'Inter';
 
 /// Hanya untuk preview layar ini secara terpisah.
 /// Aplikasi sebenarnya tetap dijalankan dari main.dart.
@@ -33,6 +35,10 @@ class BookModel {
   final bool isFavorite;
   final bool isArchivePick;
 
+  /// Path gambar cover (opsional). Kalau null / gagal dimuat,
+  /// cover otomatis memakai gradient dari dua warna di atas.
+  final String? coverAsset;
+
   const BookModel({
     required this.title,
     required this.author,
@@ -46,6 +52,7 @@ class BookModel {
     required this.description,
     this.isFavorite = false,
     this.isArchivePick = false,
+    this.coverAsset,
   });
 }
 
@@ -57,9 +64,10 @@ final List<BookModel> _allBooks = [
     genre: 'History',
     coverTopColor: Color(0xFF4FB4D8),
     coverBottomColor: Color(0xFFBEE6F2),
+    coverAsset: 'assets/covers/hujan.png',
     progress: 0.24,
     totalPages: 320,
-    currentPage: 50,
+    currentPage: 77,
     rating: 5.0,
     description:
         'Novel tentang persahabatan, harapan, dan kenangan masa lalu yang tak bisa dilupakan.',
@@ -70,15 +78,15 @@ final List<BookModel> _allBooks = [
     title: 'Aldebaran',
     author: 'Tere Liye',
     genre: 'Essays',
-    coverTopColor: Color(0xFF1E5C3A),
-    coverBottomColor: Color(0xFF0D3020),
+    coverTopColor: Color(0xFF3F8F78),
+    coverBottomColor: Color(0xFF16402F),
+    coverAsset: 'assets/covers/aldebaran.png',
     progress: 0.0,
     totalPages: 400,
     currentPage: 0,
     rating: 4.9,
     description: 'Petualangan epik di negeri yang penuh misteri dan sihir.',
     isFavorite: true,
-    isArchivePick: false,
   ),
   const BookModel(
     title: 'Hujan',
@@ -86,33 +94,42 @@ final List<BookModel> _allBooks = [
     genre: 'History',
     coverTopColor: Color(0xFF4FB4D8),
     coverBottomColor: Color(0xFFBEE6F2),
+    coverAsset: 'assets/covers/hujan.png',
     progress: 0.24,
     totalPages: 320,
-    currentPage: 50,
+    currentPage: 77,
     rating: 4.7,
     description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu.',
-    isFavorite: false,
-    isArchivePick: false,
   ),
   const BookModel(
     title: 'Aldebaran Bagian 1',
     author: 'Tere Liye',
     genre: 'Essays',
-    coverTopColor: Color(0xFF1E5C3A),
-    coverBottomColor: Color(0xFF0D3020),
+    coverTopColor: Color(0xFF3F8F78),
+    coverBottomColor: Color(0xFF16402F),
+    coverAsset: 'assets/covers/aldebaran.png',
     progress: 0.0,
     totalPages: 400,
     currentPage: 0,
     rating: 4.5,
     description: 'Bagian pertama dari seri Aldebaran yang memukau.',
-    isFavorite: false,
-    isArchivePick: false,
   ),
 ];
 
 // ─────────────────────── Library Screen ───────────────────────
 class LibraryScreen extends StatefulWidget {
-  const LibraryScreen({super.key});
+  /// Tampilkan bottom navigation bar bawaan layar ini.
+  /// Set false kalau navigasi sudah ditangani di main.dart / shell lain.
+  final bool showBottomNav;
+
+  /// Dipanggil saat item bottom nav ditekan (0 Home … 4 Account).
+  final ValueChanged<int>? onNavTap;
+
+  const LibraryScreen({
+    super.key,
+    this.showBottomNav = true,
+    this.onNavTap,
+  });
 
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
@@ -120,6 +137,7 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> {
   bool _showBanner = true;
+  int _tabIndex = 0;
   int _sortIndex = 0;
 
   List<BookModel> get _gridBooks {
@@ -139,22 +157,26 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
     return Scaffold(
       backgroundColor: _kBg,
+      bottomNavigationBar: widget.showBottomNav
+          ? _BottomNav(currentIndex: 1, onTap: widget.onNavTap)
+          : null,
       body: SafeArea(
+        bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
-            SliverToBoxAdapter(child: _buildStatsTabs()),
+            SliverToBoxAdapter(child: _buildTabs()),
             if (_showBanner) SliverToBoxAdapter(child: _buildBanner()),
             SliverToBoxAdapter(child: _buildFavoritesSection()),
             SliverToBoxAdapter(child: _buildSortChips()),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 20,
-                  childAspectRatio: 0.55,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 24,
+                  mainAxisExtent: 340,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => _BookGridCard(book: gridBooks[index]),
@@ -168,29 +190,81 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  // ── Header: logo, judul, "My Library", tombol search ──
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.auto_stories_rounded,
+                    size: 20,
+                    color: _kInk,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
               const Text(
                 'TaleMark',
                 style: TextStyle(
                   fontFamily: _kSerif,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500,
                   color: _kInk,
                 ),
               ),
-              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 36),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'My Library',
+                      style: TextStyle(
+                        fontFamily: _kSerif,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w500,
+                        color: _kInk,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '42 Editions Curated',
+                      style: TextStyle(
+                        fontFamily: _kSans,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black.withAlpha(220),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Container(
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: _kChip,
+                  color: _kTrack,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.search_rounded, size: 20, color: _kInk),
@@ -198,51 +272,60 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'My Library',
-            style: TextStyle(
-              fontFamily: _kSerif,
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: _kInk,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            '42 Editions Curated',
-            style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: _kMuted),
-          ),
-          const SizedBox(height: 14),
         ],
       ),
     );
   }
 
-  Widget _buildStatsTabs() {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E5E3), width: 1)),
-      ),
-      child: const Row(
-        children: [
-          _StatsTab(label: 'Currently Reading', count: 2, isSelected: false),
-          _StatsTab(label: 'Read', count: 28, isSelected: true),
-          _StatsTab(label: 'Want to Read', count: 12, isSelected: false),
-        ],
+  // ── Tab segmented: Currently Reading / Read / Want to Read ──
+  Widget _buildTabs() {
+    const tabs = [
+      ('Currently Reading', 2),
+      ('Read', 28),
+      ('Want to Read', 12),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: _kTrack.withAlpha(180),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            for (int i = 0; i < tabs.length; i++)
+              Expanded(
+                child: _SegmentTab(
+                  label: tabs[i].$1,
+                  count: tabs[i].$2,
+                  isSelected: _tabIndex == i,
+                  onTap: () => setState(() => _tabIndex = i),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
+  // ── Banner Reading Tracker Recovery ──
   Widget _buildBanner() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
         decoration: BoxDecoration(
-          color: _kCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E5E3), width: 1),
+          color: _kBanner,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(10),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,15 +334,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F1EF),
-                    borderRadius: BorderRadius.circular(8),
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.timer_outlined,
-                      size: 18, color: _kMuted),
+                  child: const Icon(Icons.timelapse_rounded,
+                      size: 18, color: _kInk),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,8 +351,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       Text(
                         'READING TRACKER RECOVERY',
                         style: TextStyle(
+                          fontFamily: _kSans,
                           fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0.8,
                           color: _kMuted,
                         ),
@@ -278,10 +363,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         'Forgot to turn on the Pomodoro during reading?',
                         style: TextStyle(
                           fontFamily: _kSerif,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
                           color: _kInk,
                           height: 1.25,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Your reading tracker still important.\nInput reading progress manually to keep up the reading synchronization.',
+                        style: TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 12,
+                          color: _kMuted,
+                          height: 1.5,
                         ),
                       ),
                     ],
@@ -289,35 +384,37 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 GestureDetector(
                   onTap: () => setState(() => _showBanner = false),
-                  child: const Icon(Icons.close_rounded,
-                      size: 18, color: _kMuted),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.close_rounded, size: 18, color: _kInk),
+                  ),
                 ),
               ],
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Your reading tracker still important.\nInput reading progress manually to keep up the reading synchronization.',
-              style: TextStyle(fontSize: 12, color: _kMuted, height: 1.5),
             ),
             const SizedBox(height: 14),
             Row(
               children: [
-                Expanded(
+                Flexible(
                   child: SizedBox(
-                    height: 40,
+                    height: 38,
                     child: ElevatedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.bookmark_outlined, size: 15),
+                      icon: const Icon(Icons.edit_calendar_outlined, size: 15),
                       label: const Text(
                         'Record reading progress manually',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w600),
+                          fontFamily: _kSans,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _kInk,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -334,8 +431,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Skip for now',
-                      style: TextStyle(fontSize: 12)),
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontFamily: _kSans, fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -345,6 +444,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  // ── Favorite Volumes ──
   Widget _buildFavoritesSection() {
     final favorites = _favoriteBooks;
 
@@ -352,17 +452,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.fromLTRB(16, 22, 16, 12),
+          padding: EdgeInsets.fromLTRB(24, 26, 20, 14),
           child: Row(
             children: [
-              Icon(Icons.star_outline_rounded, size: 17, color: _kInk),
-              SizedBox(width: 6),
+              Icon(Icons.auto_awesome_outlined, size: 18, color: _kInk),
+              SizedBox(width: 8),
               Text(
                 'Favorite Volumes',
                 style: TextStyle(
                   fontFamily: _kSerif,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
                   color: _kInk,
                 ),
               ),
@@ -370,12 +470,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (int i = 0; i < favorites.length; i++) ...[
-                if (i > 0) const SizedBox(width: 12),
+                if (i > 0) const SizedBox(width: 16),
                 Expanded(child: _FavoriteCard(book: favorites[i])),
               ],
             ],
@@ -385,21 +485,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+  // ── Chip urutan ──
   Widget _buildSortChips() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
       child: Row(
         children: [
           _SortChip(
             label: 'Recently Added',
-            icon: Icons.schedule_rounded,
+            icon: Icons.history_rounded,
             isSelected: _sortIndex == 0,
             onTap: () => setState(() => _sortIndex = 0),
           ),
           const SizedBox(width: 8),
           _SortChip(
             label: 'Highest Rated',
-            icon: Icons.star_outline_rounded,
+            icon: Icons.auto_awesome_outlined,
             isSelected: _sortIndex == 1,
             onTap: () => setState(() => _sortIndex = 1),
           ),
@@ -409,49 +510,68 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 }
 
-// ─────────────────────── Stats Tab ───────────────────────
-class _StatsTab extends StatelessWidget {
+// ─────────────────────── Segment Tab ───────────────────────
+class _SegmentTab extends StatelessWidget {
   final String label;
   final int count;
   final bool isSelected;
+  final VoidCallback onTap;
 
-  const _StatsTab({
+  const _SegmentTab({
     required this.label,
     required this.count,
     required this.isSelected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11,
-                  color: isSelected ? _kInk : _kMuted,
-                ),
-                children: [
-                  TextSpan(text: label),
-                  TextSpan(
-                    text: '  $count',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      color: isSelected ? _kInk : _kMuted,
-                    ),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(12),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
                   ),
-                ],
+                ]
+              : null,
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: _kInk,
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Text(
+                '$count',
+                style: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: _kMuted,
+                ),
+              ),
+            ],
           ),
-          Container(height: 2, color: isSelected ? _kInk : Colors.transparent),
-        ],
+        ),
       ),
     );
   }
@@ -477,27 +597,32 @@ class _SortChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: isSelected ? _kInk : _kCard,
+          color: isSelected ? _kCard : _kTrack,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? _kInk : const Color(0xFFDDDDDB),
-            width: 1,
-          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(14),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: isSelected ? Colors.white : _kMuted),
-            const SizedBox(width: 5),
+            Icon(icon, size: 14, color: _kInk),
+            const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'Inter',
+              style: const TextStyle(
+                fontFamily: _kSans,
                 fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : _kInk,
+                fontWeight: FontWeight.w600,
+                color: _kInk,
               ),
             ),
           ],
@@ -517,6 +642,61 @@ void _openDetail(BuildContext context, BookModel book) {
   ));
 }
 
+// ─────────────────────── Cover buku (gambar / gradient) ───────────────────────
+class _CoverArt extends StatelessWidget {
+  final BookModel book;
+  final double radius;
+  final double titleSize;
+
+  const _CoverArt({
+    required this.book,
+    this.radius = 12,
+    this.titleSize = 20,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [book.coverTopColor, book.coverBottomColor],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            book.title.toUpperCase(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: titleSize,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.4,
+              height: 1.1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: SizedBox.expand(
+        child: book.coverAsset == null
+            ? fallback
+            : Image.asset(
+                book.coverAsset!,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => fallback,
+              ),
+      ),
+    );
+  }
+}
+
 // ─────────────────────── Favorite Card ───────────────────────
 class _FavoriteCard extends StatelessWidget {
   final BookModel book;
@@ -531,125 +711,112 @@ class _FavoriteCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(
-            aspectRatio: 0.68,
+            aspectRatio: 0.74,
             child: Stack(
               children: [
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [book.coverTopColor, book.coverBottomColor],
-                        ),
+                Positioned.fill(child: _CoverArt(book: book)),
+                if (book.isArchivePick)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
                       ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            book.title.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
-                              height: 1.1,
-                            ),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(12, 22, 12, 10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withAlpha(150),
+                            ],
+                          ),
+                        ),
+                        child: const Text(
+                          'ARCHIVE PICK',
+                          style: TextStyle(
+                            fontFamily: _kSans,
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.0,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                if (book.isArchivePick)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withAlpha(166),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'ARCHIVE PICK',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ),
-                  ),
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 10,
+                  right: 10,
                   child: Container(
                     width: 28,
                     height: 28,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(230),
+                    decoration: const BoxDecoration(
+                      color: _kInk,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.star_border_rounded,
-                        size: 15, color: _kInk),
+                        size: 15, color: Colors.white),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             book.title,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: _kInk,
-            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: _kInk,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             book.author,
-            style: const TextStyle(
-                fontFamily: 'Inter', fontSize: 11, color: _kMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: _kSans,
+              fontSize: 12,
+              color: _kMuted,
+            ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.star_rounded, size: 12, color: _kInk),
-              const SizedBox(width: 3),
               Text(
-                '${book.rating}',
+                book.rating.toStringAsFixed(1),
                 style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11,
+                  fontFamily: _kSans,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: _kInk,
                 ),
               ),
-              const Text(' · ',
-                  style: TextStyle(fontSize: 11, color: _kMuted)),
+              const Text(
+                '  ·  ',
+                style: TextStyle(fontSize: 12, color: _kMuted),
+              ),
               Expanded(
                 child: Text(
                   book.genre,
-                  style: const TextStyle(
-                      fontFamily: 'Inter', fontSize: 11, color: _kMuted),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _kMuted,
+                  ),
                 ),
               ),
             ],
@@ -677,95 +844,176 @@ class _BookGridCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [book.coverTopColor, book.coverBottomColor],
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(20),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: _CoverArt(book: book, titleSize: 18),
+                  ),
+                  if (hasProgress) ...[
+                    // Bar progres di dasar cover
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                        child: LinearProgressIndicator(
+                          value: book.progress.clamp(0.0, 1.0),
+                          minHeight: 4,
+                          backgroundColor: Colors.black.withAlpha(40),
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(_kInk),
                         ),
                       ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Text(
-                            book.title.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
-                              height: 1.1,
-                            ),
+                    ),
+                    // Badge persen di kiri atas
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _kInk,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '$progressPct%',
+                          style: const TextStyle(
+                            fontFamily: _kSans,
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                if (hasProgress)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: _kInk,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        '$progressPct%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+                  ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             book.title,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: _kInk,
-            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: _kInk,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             book.author,
-            style: const TextStyle(
-                fontFamily: 'Inter', fontSize: 11, color: _kMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: _kSans,
+              fontSize: 12,
+              color: _kMuted,
+            ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.star_rounded, size: 12, color: _kInk),
-              const SizedBox(width: 3),
               Text(
-                '${book.rating}',
+                book.rating.toStringAsFixed(1),
                 style: const TextStyle(
-                    fontFamily: 'Inter', fontSize: 11, color: _kMuted),
+                  fontFamily: _kSans,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: _kMuted,
+                ),
               ),
+              const SizedBox(width: 4),
+              const Icon(Icons.star_border_rounded, size: 14, color: _kInk),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────── Bottom Navigation ───────────────────────
+class _BottomNav extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int>? onTap;
+
+  const _BottomNav({required this.currentIndex, this.onTap});
+
+  static const _items = [
+    (Icons.home_outlined, Icons.home_rounded, 'Home'),
+    (Icons.local_library_outlined, Icons.local_library_rounded, 'Library'),
+    (Icons.explore_outlined, Icons.explore_rounded, 'Feed'),
+    (Icons.bar_chart_rounded, Icons.bar_chart_rounded, 'Stats'),
+    (Icons.account_circle_outlined, Icons.account_circle_rounded, 'Account'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _kBg,
+        border: Border(
+          top: BorderSide(color: Colors.black.withAlpha(10), width: 1),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              for (int i = 0; i < _items.length; i++)
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onTap?.call(i),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          i == currentIndex ? _items[i].$2 : _items[i].$1,
+                          size: 24,
+                          color: i == currentIndex ? _kInk : _kMuted,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _items[i].$3,
+                          style: TextStyle(
+                            fontFamily: _kSans,
+                            fontSize: 11,
+                            fontWeight: i == currentIndex
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: i == currentIndex ? _kInk : _kMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
