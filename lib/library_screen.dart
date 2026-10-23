@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'book_detail_screen.dart';
 
-<<<<<<< HEAD
 // ─────────────────────── Shared constants ───────────────────────
 const _kBg = Color(0xFFF7F7F5);
 const _kCard = Colors.white;
@@ -10,8 +9,8 @@ const _kMuted = Color(0xFF6B6B6B);
 const _kChip = Color(0xFFEDEDF0);
 const _kSerif = 'Georgia';
 
-// ─────────────────────── Book Model ───────────────────────
-=======
+/// Hanya untuk preview layar ini secara terpisah.
+/// Aplikasi sebenarnya tetap dijalankan dari main.dart.
 void main() {
   runApp(const MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -19,8 +18,7 @@ void main() {
   ));
 }
 
-// Model data buku
->>>>>>> eef0dbd3401b6719c950b641ae73f265e0401fed
+// ─────────────────────── Book Model ───────────────────────
 class BookModel {
   final String title;
   final String author;
@@ -63,7 +61,8 @@ final List<BookModel> _allBooks = [
     totalPages: 320,
     currentPage: 50,
     rating: 5.0,
-    description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu yang tak bisa dilupakan.',
+    description:
+        'Novel tentang persahabatan, harapan, dan kenangan masa lalu yang tak bisa dilupakan.',
     isFavorite: true,
     isArchivePick: true,
   ),
@@ -136,6 +135,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final gridBooks = _gridBooks;
+
     return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
@@ -156,8 +157,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   childAspectRatio: 0.55,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) => _BookGridCard(book: _gridBooks[index]),
-                  childCount: _gridBooks.length,
+                  (context, index) => _BookGridCard(book: gridBooks[index]),
+                  childCount: gridBooks.length,
                 ),
               ),
             ),
@@ -223,8 +224,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFFE5E5E3), width: 1)),
       ),
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           _StatsTab(label: 'Currently Reading', count: 2, isSelected: false),
           _StatsTab(label: 'Read', count: 28, isSelected: true),
           _StatsTab(label: 'Want to Read', count: 12, isSelected: false),
@@ -255,7 +256,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     color: const Color(0xFFF1F1EF),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.timer_outlined, size: 18, color: _kMuted),
+                  child: const Icon(Icons.timer_outlined,
+                      size: 18, color: _kMuted),
                 ),
                 const SizedBox(width: 10),
                 const Expanded(
@@ -287,7 +289,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 GestureDetector(
                   onTap: () => setState(() => _showBanner = false),
-                  child: const Icon(Icons.close_rounded, size: 18, color: _kMuted),
+                  child: const Icon(Icons.close_rounded,
+                      size: 18, color: _kMuted),
                 ),
               ],
             ),
@@ -307,7 +310,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       icon: const Icon(Icons.bookmark_outlined, size: 15),
                       label: const Text(
                         'Record reading progress manually',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _kInk,
@@ -330,7 +334,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Skip for now', style: TextStyle(fontSize: 12)),
+                  child: const Text('Skip for now',
+                      style: TextStyle(fontSize: 12)),
                 ),
               ],
             ),
@@ -341,6 +346,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Widget _buildFavoritesSection() {
+    final favorites = _favoriteBooks;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -367,9 +374,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (int i = 0; i < _favoriteBooks.length; i++) ...[
+              for (int i = 0; i < favorites.length; i++) ...[
                 if (i > 0) const SizedBox(width: 12),
-                Expanded(child: _FavoriteCard(book: _favoriteBooks[i])),
+                Expanded(child: _FavoriteCard(book: favorites[i])),
               ],
             ],
           ),
@@ -500,6 +507,16 @@ class _SortChip extends StatelessWidget {
   }
 }
 
+// ─────────────────────── Navigasi ke detail ───────────────────────
+void _openDetail(BuildContext context, BookModel book) {
+  Navigator.of(context).push(PageRouteBuilder(
+    pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
+    transitionsBuilder: (_, animation, __, child) =>
+        FadeTransition(opacity: animation, child: child),
+    transitionDuration: const Duration(milliseconds: 280),
+  ));
+}
+
 // ─────────────────────── Favorite Card ───────────────────────
 class _FavoriteCard extends StatelessWidget {
   final BookModel book;
@@ -509,14 +526,7 @@ class _FavoriteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(PageRouteBuilder(
-          pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-          transitionsBuilder: (_, animation, __, child) =>
-              FadeTransition(opacity: animation, child: child),
-          transitionDuration: const Duration(milliseconds: 280),
-        ));
-      },
+      onTap: () => _openDetail(context, book),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -524,28 +534,30 @@ class _FavoriteCard extends StatelessWidget {
             aspectRatio: 0.68,
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [book.coverTopColor, book.coverBottomColor],
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [book.coverTopColor, book.coverBottomColor],
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          book.title.toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                            height: 1.1,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            book.title.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                              height: 1.1,
+                            ),
                           ),
                         ),
                       ),
@@ -558,9 +570,10 @@ class _FavoriteCard extends StatelessWidget {
                     left: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 5),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.65),
+                        color: Colors.black.withAlpha(166),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(10),
                           bottomRight: Radius.circular(10),
@@ -584,10 +597,11 @@ class _FavoriteCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withAlpha(230),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.star_border_rounded, size: 15, color: _kInk),
+                    child: const Icon(Icons.star_border_rounded,
+                        size: 15, color: _kInk),
                   ),
                 ),
               ],
@@ -608,7 +622,8 @@ class _FavoriteCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             book.author,
-            style: const TextStyle(fontFamily: 'Inter', fontSize: 11, color: _kMuted),
+            style: const TextStyle(
+                fontFamily: 'Inter', fontSize: 11, color: _kMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -626,11 +641,13 @@ class _FavoriteCard extends StatelessWidget {
                   color: _kInk,
                 ),
               ),
-              const Text(' · ', style: TextStyle(fontSize: 11, color: _kMuted)),
+              const Text(' · ',
+                  style: TextStyle(fontSize: 11, color: _kMuted)),
               Expanded(
                 child: Text(
                   book.genre,
-                  style: const TextStyle(fontFamily: 'Inter', fontSize: 11, color: _kMuted),
+                  style: const TextStyle(
+                      fontFamily: 'Inter', fontSize: 11, color: _kMuted),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -655,43 +672,37 @@ class _BookGridCard extends StatelessWidget {
     final progressPct = (book.progress * 100).round();
 
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(PageRouteBuilder(
-          pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-          transitionsBuilder: (_, animation, __, child) =>
-              FadeTransition(opacity: animation, child: child),
-          transitionDuration: const Duration(milliseconds: 280),
-        ));
-      },
+      onTap: () => _openDetail(context, book),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [book.coverTopColor, book.coverBottomColor],
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [book.coverTopColor, book.coverBottomColor],
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          book.title.toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                            height: 1.1,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            book.title.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                              height: 1.1,
+                            ),
                           ),
                         ),
                       ),
@@ -703,7 +714,8 @@ class _BookGridCard extends StatelessWidget {
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: _kInk,
                         borderRadius: BorderRadius.circular(5),
@@ -736,7 +748,8 @@ class _BookGridCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             book.author,
-            style: const TextStyle(fontFamily: 'Inter', fontSize: 11, color: _kMuted),
+            style: const TextStyle(
+                fontFamily: 'Inter', fontSize: 11, color: _kMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -747,7 +760,8 @@ class _BookGridCard extends StatelessWidget {
               const SizedBox(width: 3),
               Text(
                 '${book.rating}',
-                style: const TextStyle(fontFamily: 'Inter', fontSize: 11, color: _kMuted),
+                style: const TextStyle(
+                    fontFamily: 'Inter', fontSize: 11, color: _kMuted),
               ),
             ],
           ),

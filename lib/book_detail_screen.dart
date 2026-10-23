@@ -1,31 +1,11 @@
 import 'package:flutter/material.dart';
-import 'library_screen.dart'; // pastikan BookModel didefinisikan di file ini
+import 'library_screen.dart'; // BookModel didefinisikan di file ini
 
 // Warna teks redup (lokal, supaya tidak error "not a constant expression")
 const Color _muted = Color(0xFF8A8A86);
 
-/// Mengambil warna cover dari BookModel tanpa bergantung pada satu nama field.
-/// Mencoba beberapa nama umum; kalau tidak ada yang cocok, pakai warna default.
-/// Kalau sudah tahu nama field aslinya, ganti isi fungsi ini dengan
-/// `return book.namaFieldAnda;`
-Color _resolveCoverColor(BookModel book) {
-  final dynamic b = book;
-  final List<Color Function()> candidates = [
-    () => b.color as Color,
-    () => b.cover as Color,
-    () => b.bgColor as Color,
-    () => b.backgroundColor as Color,
-  ];
-  for (final getColor in candidates) {
-    try {
-      return getColor();
-    } catch (_) {
-      // field tidak ada / bukan Color, coba kandidat berikutnya
-    }
-  }
-  return const Color(0xFF1F3A5F);
-}
-
+/// Hanya untuk preview layar ini secara terpisah.
+/// Aplikasi sebenarnya tetap dijalankan dari main.dart.
 void main() => runApp(const BookDetailScreenApp());
 
 class BookDetailScreenApp extends StatelessWidget {
@@ -34,7 +14,8 @@ class BookDetailScreenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true),
       home: BookDetailScreen(
         book: BookModel(
           title: 'The Little Prince',
@@ -45,7 +26,9 @@ class BookDetailScreenApp extends StatelessWidget {
           totalPages: 96,
           currentPage: 0,
           progress: 0,
-          coverColor: const Color(0xFF5B6C8F),
+          rating: 4.5,
+          coverTopColor: const Color(0xFF5B6C8F),
+          coverBottomColor: const Color(0xFF3A4766),
         ),
       ),
     );
@@ -63,7 +46,9 @@ class BookDetailScreen extends StatelessWidget {
     final double progress = book.progress.toDouble().clamp(0.0, 1.0).toDouble();
     final bool isDone = progress >= 1.0;
     final bool notStarted = progress == 0.0;
-    final Color coverColor = _resolveCoverColor(book);
+
+    final Color topColor = book.coverTopColor;
+    final Color bottomColor = book.coverBottomColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F7),
@@ -73,7 +58,7 @@ class BookDetailScreen extends StatelessWidget {
           SliverAppBar(
             expandedHeight: 340,
             pinned: true,
-            backgroundColor: coverColor,
+            backgroundColor: topColor,
             automaticallyImplyLeading: false,
             leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
@@ -111,7 +96,13 @@ class BookDetailScreen extends StatelessWidget {
               background: Hero(
                 tag: 'book-${book.title}',
                 child: Container(
-                  color: coverColor,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [topColor, bottomColor],
+                    ),
+                  ),
                   child: Stack(
                     children: [
                       // Pola dekoratif
@@ -344,6 +335,10 @@ class BookDetailScreen extends StatelessWidget {
                   _InfoRow(
                     label: 'Total Halaman',
                     value: '${book.totalPages} hal.',
+                  ),
+                  _InfoRow(
+                    label: 'Rating',
+                    value: '★ ${book.rating.toStringAsFixed(1)}',
                   ),
                   const SizedBox(height: 32),
                 ],
