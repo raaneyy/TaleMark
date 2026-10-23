@@ -1,182 +1,512 @@
 import 'package:flutter/material.dart';
-import 'library_screen.dart'; // BookModel didefinisikan di file ini
+import 'package:flutter/services.dart';
+import 'library_screen.dart'; // BookModel & BookQuote didefinisikan di file ini
 
-// Warna teks redup (lokal, supaya tidak error "not a constant expression")
-const Color _muted = Color(0xFF8A8A86);
+// ─────────────────────── Konstanta desain ───────────────────────
+const _kBg = Color(0xFFFAFAF8);
+const _kCard = Colors.white;
+const _kInk = Color(0xFF111111);
+const _kMuted = Color(0xFF8A8A86);
+const _kBody = Color(0xFF4A4A48);
+const _kTrack = Color(0xFFF1F1EF);
+const _kInset = Color(0xFFF4F4F2);
+const _kSerif = 'Newsreader';
+const _kSans = 'Inter';
+
+const _kStatusLabels = ['Want to Read', 'Reading', 'Finished'];
 
 /// Hanya untuk preview layar ini secara terpisah.
 /// Aplikasi sebenarnya tetap dijalankan dari main.dart.
-void main() => runApp(const BookDetailScreenApp());
-
-class BookDetailScreenApp extends StatelessWidget {
-  const BookDetailScreenApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: BookDetailScreen(
-        book: BookModel(
-          title: 'The Little Prince',
-          author: 'Antoine de Saint-Exupéry',
-          genre: 'Fiksi',
-          description:
-              'Sebuah kisah tentang persahabatan, perjalanan, dan cara melihat dunia.',
-          totalPages: 96,
-          currentPage: 0,
-          progress: 0,
-          rating: 4.5,
-          coverTopColor: const Color(0xFF5B6C8F),
-          coverBottomColor: const Color(0xFF3A4766),
-        ),
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: BookDetailScreen(
+      book: BookModel(
+        title: 'Hujan',
+        author: 'Tere Liye',
+        genre: 'Fiction',
+        subGenres: 'Fiksi Ilmiah, Distopia, Romance',
+        year: 2016,
+        format: 'Novella',
+        readers: 1240,
+        coverTopColor: const Color(0xFF4FB4D8),
+        coverBottomColor: const Color(0xFFBEE6F2),
+        coverAsset: 'assets/covers/hujan.png',
+        progress: 0.24,
+        totalPages: 320,
+        currentPage: 77,
+        rating: 4.6,
+        description:
+            'Novel tentang persahabatan, harapan, dan kenangan masa lalu. Lail berusaha mengatasi trauma masa lalu dan kerinduan mendalam pada sahabatnya, Esok. Di tengah dunia yang terus berubah, ia belajar menerima apa yang telah hilang.',
+        quotes: const [
+          BookQuote(
+            label: 'ENDING',
+            text: 'Contoh kutipan pertama. Ganti dengan kutipan favoritmu.',
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  ));
 }
 
-class BookDetailScreen extends StatelessWidget {
+BoxDecoration _cardDecoration() => BoxDecoration(
+      color: _kCard,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(10),
+          blurRadius: 12,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+
+// ─────────────────────── Book Detail Screen ───────────────────────
+class BookDetailScreen extends StatefulWidget {
   final BookModel book;
 
   const BookDetailScreen({super.key, required this.book});
 
   @override
+  State<BookDetailScreen> createState() => _BookDetailScreenState();
+}
+
+class _BookDetailScreenState extends State<BookDetailScreen> {
+  /// Asumsi kecepatan baca, dipakai untuk estimasi waktu.
+  static const double _minutesPerPage = 0.5;
+
+  late int _status; // 0 = Want to Read, 1 = Reading, 2 = Finished
+  late int _currentPage;
+  late final TextEditingController _pageCtrl;
+  late final List<BookQuote> _quotes;
+  bool _expanded = false;
+  int _myScore = 0;
+
+  BookModel get book => widget.book;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = book.progress;
+    _status = p >= 1.0 ? 2 : (p > 0 ? 1 : 0);
+    _currentPage = book.currentPage.clamp(0, book.totalPages).toInt();
+    _pageCtrl = TextEditingController(text: '$_currentPage');
+    _quotes = List<BookQuote>.of(book.quotes);
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  // ── Helper hitung ──
+  int get _percent => book.totalPages == 0
+      ? 0
+      : (_currentPage / book.totalPages * 100).round();
+
+  double get _progressValue => book.totalPages == 0
+      ? 0.0
+      : (_currentPage / book.totalPages).clamp(0.0, 1.0).toDouble();
+
+  String get _timeLeft {
+    final mins = ((book.totalPages - _currentPage) * _minutesPerPage).round();
+    if (mins <= 0) return 'Finished';
+    final h = mins ~/ 60;
+    final m = mins % 60;
+    if (h == 0) return '$m mins';
+    if (m == 0) return '$h hr';
+    return '$h hr $m mins';
+  }
+
+  String get _totalHours {
+    final h = (book.totalPages * _minutesPerPage / 60 * 2).round() / 2;
+    return h == h.roundToDouble() ? h.toInt().toString() : h.toStringAsFixed(1);
+  }
+
+  String _fmtNumber(int n) => n.toString().replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (m) => ',',
+      );
+
+  // ── Aksi ──
+  void _saveProgress() {
+    final v = int.tryParse(_pageCtrl.text.trim());
+    if (v == null) {
+      _snack('Masukkan nomor halaman yang valid');
+      return;
+    }
+    final page = v.clamp(0, book.totalPages).toInt();
+    setState(() {
+      _currentPage = page;
+      _pageCtrl.text = '$page';
+    });
+    FocusScope.of(context).unfocus();
+    _snack('Progres tersimpan: halaman $page dari ${book.totalPages}');
+  }
+
+  Future<void> _addQuote() async {
+    final ctrl = TextEditingController();
+    final text = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'New Quote',
+          style: TextStyle(fontFamily: _kSerif, fontSize: 22),
+        ),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          minLines: 3,
+          maxLines: 6,
+          decoration: const InputDecoration(
+            hintText: 'Tulis kutipan dari buku ini...',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    if (text == null || text.isEmpty || !mounted) return;
+    setState(() => _quotes.add(BookQuote(label: 'PAGE $_currentPage', text: text)));
+  }
+
+  void _snack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // ─────────────────────── BUILD ───────────────────────
+  @override
   Widget build(BuildContext context) {
-    // Pastikan progress selalu double antara 0.0 - 1.0
-    final double progress = book.progress.toDouble().clamp(0.0, 1.0).toDouble();
-    final bool isDone = progress >= 1.0;
-    final bool notStarted = progress == 0.0;
-
-    final Color topColor = book.coverTopColor;
-    final Color bottomColor = book.coverBottomColor;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F7),
-      body: CustomScrollView(
-        slivers: [
-          // Hero App Bar dengan cover buku
-          SliverAppBar(
-            expandedHeight: 340,
-            pinned: true,
-            backgroundColor: topColor,
-            automaticallyImplyLeading: false,
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(40),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
+      backgroundColor: _kBg,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildTopBar(),
+              const SizedBox(height: 8),
+              _buildCover(),
+              const SizedBox(height: 28),
+              _buildTitleBlock(),
+              const SizedBox(height: 20),
+              _buildRatingPill(),
+              const SizedBox(height: 24),
+              _buildStatusTabs(),
+              if (_status == 1) ...[
+                const SizedBox(height: 12),
+                _buildProgressCard(),
+              ],
+              const SizedBox(height: 20),
+              _buildOverview(),
+              const SizedBox(height: 20),
+              _buildVerdict(),
+              const SizedBox(height: 28),
+              _buildMarginaliaHeader(),
+              const SizedBox(height: 12),
+              ..._buildQuoteCards(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Tombol kembali ──
+  Widget _buildTopBar() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: IconButton(
+        onPressed: () => Navigator.of(context).maybePop(),
+        icon: const Icon(Icons.arrow_back_rounded, color: _kInk, size: 24),
+      ),
+    );
+  }
+
+  // ── Cover ──
+  Widget _buildCover() {
+    final fallback = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [book.coverTopColor, book.coverBottomColor],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            book.title.toUpperCase(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+              height: 1.1,
             ),
-            actions: [
-              Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(40),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.more_horiz_rounded,
-                    color: Colors.white,
-                    size: 20,
+          ),
+        ),
+      ),
+    );
+
+    return Center(
+      child: Container(
+        width: 160,
+        height: 240,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(60),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: book.coverAsset == null
+                    ? fallback
+                    : Image.asset(
+                        book.coverAsset!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => fallback,
+                      ),
+              ),
+              Positioned(
+                left: 8,
+                bottom: 8,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6B6B6B).withAlpha(210),
+                    borderRadius: BorderRadius.circular(3),
                   ),
-                  onPressed: () {},
+                  child: Text(
+                    book.genre.toUpperCase(),
+                    style: const TextStyle(
+                      fontFamily: _kSans,
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
                 ),
               ),
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'book-${book.title}',
-                child: Container(
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Sub-genre, judul, penulis, meta ──
+  Widget _buildTitleBlock() {
+    return Column(
+      children: [
+        Text(
+          (book.subGenres ?? book.genre).toUpperCase(),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: _kSans,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 1.0,
+            color: _kBody,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          book.title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: _kSerif,
+            fontSize: 40,
+            fontWeight: FontWeight.w500,
+            color: _kInk,
+            height: 1.1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          book.author,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: _kSerif,
+            fontSize: 20,
+            fontStyle: FontStyle.italic,
+            color: Color(0xFF6B6B6B),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _buildMeta(),
+      ],
+    );
+  }
+
+  Widget _buildMeta() {
+    final parts = <String>[
+      if (book.year != null) '${book.year}',
+      if (book.format != null) book.format!,
+      '${book.totalPages} pages',
+      '~$_totalHours hrs',
+    ];
+
+    final spans = <InlineSpan>[];
+    for (int i = 0; i < parts.length; i++) {
+      if (i > 0) {
+        spans.add(const TextSpan(
+          text: '  •  ',
+          style: TextStyle(color: Color(0xFFC8C8C4)),
+        ));
+      }
+      spans.add(TextSpan(text: parts[i]));
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: const TextStyle(
+          fontFamily: _kSans,
+          fontSize: 14,
+          color: _kBody,
+        ),
+        children: spans,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  // ── Pil rating ──
+  Widget _buildRatingPill() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: _kTrack,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(10),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _stars(book.rating),
+            const SizedBox(width: 10),
+            Text(
+              book.rating.toStringAsFixed(1),
+              style: const TextStyle(
+                fontFamily: _kSans,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _kInk,
+              ),
+            ),
+            if (book.readers != null) ...[
+              const SizedBox(width: 10),
+              const Text(
+                '/',
+                style: TextStyle(fontSize: 15, color: Color(0xFFC8C8C4)),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '${_fmtNumber(book.readers!)} readers',
+                style: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 14,
+                  color: _kMuted,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _stars(double rating, {double size = 18}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        final v = rating - i;
+        final icon = v >= 0.75
+            ? Icons.star_rounded
+            : v >= 0.25
+                ? Icons.star_half_rounded
+                : Icons.star_border_rounded;
+        return Icon(icon, size: size, color: _kInk);
+      }),
+    );
+  }
+
+  // ── Tab status: Want to Read / Reading / Finished ──
+  Widget _buildStatusTabs() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: _kTrack,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < _kStatusLabels.length; i++)
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(() => _status = i),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [topColor, bottomColor],
-                    ),
+                    color: _status == i ? _kInk : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Stack(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Pola dekoratif
-                      ...List.generate(5, (i) {
-                        return Positioned(
-                          top: -20 + (i * 60.0),
-                          right: -40 + (i * 15.0),
-                          child: Container(
-                            width: 180,
-                            height: 180,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withAlpha(10),
-                                width: 1,
-                              ),
-                            ),
+                      if (_status == i && i == 1) ...[
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
                           ),
-                        );
-                      }),
-                      // Konten
-                      Positioned(
-                        bottom: 40,
-                        left: 32,
-                        right: 32,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withAlpha(25),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                book.genre.toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  letterSpacing: 1.2,
-                                  fontFamily: 'Inter',
-                                  color: Colors.white.withAlpha(200),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Material(
-                              type: MaterialType.transparency,
-                              child: Text(
-                                book.title,
-                                style: const TextStyle(
-                                  fontFamily: 'Newsreader',
-                                  fontSize: 30,
-                                  color: Colors.white,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Material(
-                              type: MaterialType.transparency,
-                              child: Text(
-                                book.author,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 14,
-                                  color: Colors.white.withAlpha(180),
-                                ),
-                              ),
-                            ),
-                          ],
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        _kStatusLabels[i],
+                        style: TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 14,
+                          fontWeight:
+                              _status == i ? FontWeight.w600 : FontWeight.w500,
+                          color: _status == i ? Colors.white : _kBody,
                         ),
                       ),
                     ],
@@ -184,164 +514,146 @@ class BookDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  // ── Kartu progres sesi membaca ──
+  Widget _buildProgressCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Flexible(
+                child: Text(
+                  'CURRENT SESSION PROGRESS',
+                  style: TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.8,
+                    color: _kBody,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'p. $_currentPage of ${book.totalPages} ($_percent%)',
+                style: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _kInk,
+                ),
+              ),
+            ],
           ),
-
-          // Detail konten
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Kartu progres
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(8),
-                          blurRadius: 12,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const _SectionLabel('PROGRES MEMBACA'),
-                            Text(
-                              isDone
-                                  ? 'Selesai ✓'
-                                  : notStarted
-                                      ? 'Belum dibaca'
-                                      : '${(progress * 100).round()}%',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isDone
-                                    ? const Color(0xFF2D7D32)
-                                    : Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            backgroundColor: const Color(0xFFF1F1EF),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              isDone ? const Color(0xFF2D7D32) : Colors.black,
-                            ),
-                            minHeight: 6,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _StatChip(
-                              label: 'Halaman',
-                              value: book.totalPages.toString(),
-                            ),
-                            _StatChip(
-                              label: 'Dibaca',
-                              value: book.currentPage.toString(),
-                            ),
-                            _StatChip(
-                              label: 'Tersisa',
-                              value: (book.totalPages - book.currentPage)
-                                  .toString(),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _progressValue,
+              minHeight: 6,
+              backgroundColor: _kTrack,
+              valueColor: const AlwaysStoppedAnimation<Color>(_kInk),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Estimated time left: $_timeLeft',
+            style: const TextStyle(
+              fontFamily: _kSans,
+              fontSize: 13,
+              color: _kMuted,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: _kInset,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'LAST PAGE',
+                  style: TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                    color: _kBody,
                   ),
-                  const SizedBox(height: 24),
-
-                  // Tombol aksi
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.menu_book_rounded, size: 16),
-                          label: Text(
-                            notStarted
-                                ? 'Mulai Membaca'
-                                : isDone
-                                    ? 'Baca Ulang'
-                                    : 'Lanjut Membaca',
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 76,
+                      child: TextField(
+                        controller: _pageCtrl,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.right,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        style: const TextStyle(
+                          fontFamily: _kSerif,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w500,
+                          color: _kInk,
+                        ),
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F1EF),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.bookmark_border_rounded,
-                            size: 20,
-                          ),
-                          onPressed: () {},
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Sinopsis
-                  const _SectionLabel('SINOPSIS'),
-                  const SizedBox(height: 10),
-                  Text(
-                    book.description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF3A3A38),
-                      height: 1.7,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Informasi buku
-                  const _SectionLabel('INFORMASI BUKU'),
-                  const SizedBox(height: 10),
-                  _InfoRow(label: 'Penulis', value: book.author),
-                  _InfoRow(label: 'Genre', value: book.genre),
-                  _InfoRow(
-                    label: 'Total Halaman',
-                    value: '${book.totalPages} hal.',
-                  ),
-                  _InfoRow(
-                    label: 'Rating',
-                    value: '★ ${book.rating.toStringAsFixed(1)}',
-                  ),
-                  const SizedBox(height: 32),
-                ],
+                    Text(
+                      '/${book.totalPages}',
+                      style: const TextStyle(
+                        fontFamily: _kSerif,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w400,
+                        color: _kBody,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: _saveProgress,
+              icon: const Icon(Icons.bookmark_added_outlined, size: 20),
+              label: const Text(
+                'Save reading progress',
+                style: TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -349,81 +661,282 @@ class BookDetailScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _SectionLabel extends StatelessWidget {
-  final String text;
-
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 11,
-        letterSpacing: 0.8,
-        color: _muted,
-        fontWeight: FontWeight.w500,
+  // ── Overview ──
+  Widget _buildOverview() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Overview',
+            style: TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 12),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.topCenter,
+            child: Text(
+              book.description,
+              maxLines: _expanded ? null : 2,
+              overflow: _expanded ? TextOverflow.visible : TextOverflow.fade,
+              style: const TextStyle(
+                fontFamily: _kSans,
+                fontSize: 16,
+                height: 1.6,
+                color: _kBody,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _expanded ? 'Read less' : 'Read more',
+                  style: const TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: _kInk,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  _expanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: 18,
+                  color: _kInk,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
-}
 
-class _StatChip extends StatelessWidget {
-  final String label;
-  final String value;
+  // ── Penilaian pribadi ──
+  Widget _buildVerdict() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'PRIVATE LEDGER',
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.8,
+              color: _kBody,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Your Critical Verdict',
+            style: TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 18),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            decoration: BoxDecoration(
+              color: _kInset,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Score',
+                  style: TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 15,
+                    color: _kBody,
+                  ),
+                ),
+                const Spacer(),
+                for (int i = 1; i <= 5; i++)
+                  GestureDetector(
+                    onTap: () =>
+                        setState(() => _myScore = _myScore == i ? 0 : i),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 14),
+                      child: Icon(
+                        i <= _myScore
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 28,
+                        color: _kInk,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  const _StatChip({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
+  // ── Marginalia & Excerpts ──
+  Widget _buildMarginaliaHeader() {
+    return Row(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Marginalia & Excerpts',
+                  style: TextStyle(
+                    fontFamily: _kSerif,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                    color: _kInk,
+                  ),
+                ),
+                TextSpan(
+                  text: '   (${_quotes.length} Saved)',
+                  style: const TextStyle(
+                    fontFamily: _kSans,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _kMuted,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: _muted),
+        TextButton.icon(
+          onPressed: _addQuote,
+          icon: const Icon(Icons.add_rounded, size: 20),
+          label: const Text(
+            'New Quote',
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: _kInk,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
         ),
       ],
     );
   }
+
+  List<Widget> _buildQuoteCards() {
+    if (_quotes.isEmpty) {
+      return [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: _cardDecoration(),
+          child: const Center(
+            child: Text(
+              'Belum ada kutipan tersimpan.',
+              style: TextStyle(
+                fontFamily: _kSans,
+                fontSize: 14,
+                color: _kMuted,
+              ),
+            ),
+          ),
+        ),
+      ];
+    }
+
+    return [
+      for (final q in _quotes)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _QuoteCard(
+            quote: q,
+            onPost: () => _snack('Fitur posting belum tersedia'),
+          ),
+        ),
+    ];
+  }
 }
 
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
+// ─────────────────────── Quote Card ───────────────────────
+class _QuoteCard extends StatelessWidget {
+  final BookQuote quote;
+  final VoidCallback onPost;
 
-  const _InfoRow({required this.label, required this.value});
+  const _QuoteCard({required this.quote, required this.onPost});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 13, color: _muted),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
+          Row(
+            children: [
+              Text(
+                quote.label.toUpperCase(),
+                style: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                  color: _kBody,
+                ),
               ),
+              const Spacer(),
+              const Icon(Icons.bookmark_added_outlined,
+                  size: 22, color: _kBody),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '\u201C${quote.text}\u201D',
+            style: const TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 22,
+              fontStyle: FontStyle.italic,
+              height: 1.5,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: onPost,
+              icon: const Icon(Icons.ios_share_rounded, size: 18),
+              label: const Text(
+                'Post',
+                style: TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: TextButton.styleFrom(foregroundColor: _kBody),
             ),
           ),
         ],

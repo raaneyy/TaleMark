@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'book_detail_screen.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
@@ -14,10 +15,9 @@ const _kSans = 'Inter';
 /// Hanya untuk preview layar ini secara terpisah.
 /// Aplikasi sebenarnya tetap dijalankan dari main.dart.
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: LibraryScreen(),
-  ));
+  runApp(
+    const MaterialApp(debugShowCheckedModeBanner: false, home: LibraryScreen()),
+  );
 }
 
 // ─────────────────────── Book Model ───────────────────────
@@ -39,6 +39,13 @@ class BookModel {
   /// cover otomatis memakai gradient dari dua warna di atas.
   final String? coverAsset;
 
+  /// Info tambahan untuk halaman detail (semua opsional).
+  final String? subGenres; // contoh: 'Fiksi Ilmiah, Distopia, Romance'
+  final int? year;
+  final String? format; // contoh: 'Novella'
+  final int? readers; // jumlah pembaca
+  final List<BookQuote> quotes; // kutipan yang tersimpan
+
   const BookModel({
     required this.title,
     required this.author,
@@ -53,8 +60,36 @@ class BookModel {
     this.isFavorite = false,
     this.isArchivePick = false,
     this.coverAsset,
+    this.subGenres,
+    this.year,
+    this.format,
+    this.readers,
+    this.quotes = const [],
   });
 }
+
+/// Kutipan / marginalia yang disimpan pembaca.
+class BookQuote {
+  final String label; // contoh: 'ENDING'
+  final String text;
+
+  const BookQuote({required this.label, required this.text});
+}
+
+const _hujanQuotes = [
+  BookQuote(
+    label: 'ENDING',
+    text: 'Bukan seberapa lama umat manusia bisa bertahan hidup sebagai ukuran kebahagiaan, tapi seberapa besar kemampuan mereka memeluk erat-erat semua hal menyakitkan yang mereka alami.',
+  ),
+  BookQuote(
+    label: 'CONTOH',
+    text: 'Contoh kutipan kedua. Ganti dengan kutipan favoritmu.',
+  ),
+  BookQuote(
+    label: 'CONTOH',
+    text: 'Contoh kutipan ketiga. Tekan "New Quote" untuk menambah sendiri.',
+  ),
+];
 
 // ─────────────────────── Dummy data ───────────────────────
 final List<BookModel> _allBooks = [
@@ -69,10 +104,14 @@ final List<BookModel> _allBooks = [
     totalPages: 320,
     currentPage: 77,
     rating: 5.0,
-    description:
-        'Novel tentang persahabatan, harapan, dan kenangan masa lalu yang tak bisa dilupakan.',
+    description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu yang tak bisa dilupakan.',
     isFavorite: true,
     isArchivePick: true,
+    subGenres: 'Fiksi Ilmiah, Distopia, Romance',
+    year: 2016,
+    format: 'Novella',
+    readers: 1240,
+    quotes: _hujanQuotes,
   ),
   const BookModel(
     title: 'Aldebaran',
@@ -100,6 +139,11 @@ final List<BookModel> _allBooks = [
     currentPage: 77,
     rating: 4.7,
     description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu.',
+    subGenres: 'Fiksi Ilmiah, Distopia, Romance',
+    year: 2016,
+    format: 'Novella',
+    readers: 1240,
+    quotes: _hujanQuotes,
   ),
   const BookModel(
     title: 'Aldebaran Bagian 1',
@@ -125,11 +169,7 @@ class LibraryScreen extends StatefulWidget {
   /// Dipanggil saat item bottom nav ditekan (0 Home … 4 Account).
   final ValueChanged<int>? onNavTap;
 
-  const LibraryScreen({
-    super.key,
-    this.showBottomNav = true,
-    this.onNavTap,
-  });
+  const LibraryScreen({super.key, this.showBottomNav = true, this.onNavTap});
 
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
@@ -279,11 +319,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   // ── Tab segmented: Currently Reading / Read / Want to Read ──
   Widget _buildTabs() {
-    const tabs = [
-      ('Currently Reading', 2),
-      ('Read', 28),
-      ('Want to Read', 12),
-    ];
+    const tabs = [('Currently Reading', 2), ('Read', 28), ('Want to Read', 12)];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -340,8 +376,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.timelapse_rounded,
-                      size: 18, color: _kInk),
+                  child: const Icon(
+                    Icons.timelapse_rounded,
+                    size: 18,
+                    color: _kInk,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -634,12 +673,14 @@ class _SortChip extends StatelessWidget {
 
 // ─────────────────────── Navigasi ke detail ───────────────────────
 void _openDetail(BuildContext context, BookModel book) {
-  Navigator.of(context).push(PageRouteBuilder(
-    pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-    transitionsBuilder: (_, animation, __, child) =>
-        FadeTransition(opacity: animation, child: child),
-    transitionDuration: const Duration(milliseconds: 280),
-  ));
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
+      transitionsBuilder: (_, animation, __, child) =>
+          FadeTransition(opacity: animation, child: child),
+      transitionDuration: const Duration(milliseconds: 280),
+    ),
+  );
 }
 
 // ─────────────────────── Cover buku (gambar / gradient) ───────────────────────
@@ -648,11 +689,7 @@ class _CoverArt extends StatelessWidget {
   final double radius;
   final double titleSize;
 
-  const _CoverArt({
-    required this.book,
-    this.radius = 12,
-    this.titleSize = 20,
-  });
+  const _CoverArt({required this.book, this.radius = 12, this.titleSize = 20});
 
   @override
   Widget build(BuildContext context) {
@@ -760,8 +797,11 @@ class _FavoriteCard extends StatelessWidget {
                       color: _kInk,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.star_border_rounded,
-                        size: 15, color: Colors.white),
+                    child: const Icon(
+                      Icons.star_border_rounded,
+                      size: 15,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
@@ -857,9 +897,7 @@ class _BookGridCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  Positioned.fill(
-                    child: _CoverArt(book: book, titleSize: 18),
-                  ),
+                  Positioned.fill(child: _CoverArt(book: book, titleSize: 18)),
                   if (hasProgress) ...[
                     // Bar progres di dasar cover
                     Positioned(
@@ -875,8 +913,9 @@ class _BookGridCard extends StatelessWidget {
                           value: book.progress.clamp(0.0, 1.0),
                           minHeight: 4,
                           backgroundColor: Colors.black.withAlpha(40),
-                          valueColor:
-                              const AlwaysStoppedAnimation<Color>(_kInk),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            _kInk,
+                          ),
                         ),
                       ),
                     ),
@@ -886,7 +925,9 @@ class _BookGridCard extends StatelessWidget {
                       left: 10,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _kInk,
                           borderRadius: BorderRadius.circular(6),
