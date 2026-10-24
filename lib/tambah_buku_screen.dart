@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'app_theme.dart';
 import 'widgets/auth_widgets.dart';
@@ -45,6 +48,8 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
 
   // Status buku, hanya boleh pilih 1
   String statusTerpilih = 'Sedang Dibaca';
+  // Foto sampul yang dipilih pengguna (null berarti belum ada foto)
+  File? fotoSampul;
 
   @override
   void dispose() {
@@ -119,6 +124,23 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
     );
   }
 
+  // Ambil foto sampul dari kamera atau galeri
+  Future<void> ambilFoto(ImageSource sumber) async {
+    final picker = ImagePicker();
+    final XFile? hasil = await picker.pickImage(
+      source: sumber,
+      maxWidth: 1200, // perkecil ukuran supaya tidak terlalu berat
+      imageQuality: 85, // kualitas 85% sudah cukup tajam
+    );
+
+    // Kalau batal, nggak jadi memilih foto, hasilnya null
+    if (hasil == null) return;
+
+    setState(() {
+      fotoSampul = File(hasil.path);
+    });
+  }
+
   // BAGIAN-BAGIAN TAMPILAN
 
   // 1. Kotak info di paling atas
@@ -163,7 +185,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
     );
   }
 
-  // 2. Pratinjau sampul buku + tombol foto
+  // 2. Pratinjau sampul buku dan tombol foto
   Widget _pratinjauSampul() {
     // Kalau kolom masih kosong, tampilkan tulisan contoh
     String judul = _judulController.text.isEmpty
@@ -178,65 +200,95 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
         Container(
           width: 170,
           height: 250,
-          padding: const EdgeInsets.all(16),
+          // Kalau sudah ada foto, jarak dalam dihapus biar foto memenuhi kotak
+          padding: fotoSampul == null
+              ? const EdgeInsets.all(16)
+              : EdgeInsets.zero,
+          clipBehavior:
+              Clip.antiAlias, // foto terpotong otomatis, ngikutin bentuk yang membulat
           decoration: BoxDecoration(
             color: const Color(0xFFEDEDEB),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              const Icon(
-                Icons.photo_camera_outlined,
-                size: 32,
-                color: AppTheme.muted,
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'PRATINJAU SAMPUL',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 1,
-                  color: AppTheme.muted,
+          child: fotoSampul != null
+              // Sudah ada foto berarti tampilkan fotonya
+              ? Image.file(fotoSampul!, fit: BoxFit.cover)
+              // Belum ada foto berarti tampilkan pratinjau tulisan seperti sebelumnya
+              : Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    const Icon(
+                      Icons.photo_camera_outlined,
+                      size: 32,
+                      color: AppTheme.muted,
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'PRATINJAU SAMPUL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 1,
+                        color: AppTheme.muted,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      judul,
+                      style: AppTheme.serif(size: 20),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      penulis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: AppTheme.muted,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    const Text(
+                      'Min. 600 × 900 px',
+                      style: TextStyle(fontSize: 10, color: Color(0xFFB0B0AD)),
+                    ),
+                  ],
                 ),
-              ),
-              const Spacer(),
-              Text(
-                judul,
-                style: AppTheme.serif(size: 20),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                penulis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                  color: AppTheme.muted,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Spacer(),
-              const Text(
-                'Min. 600 × 900 px',
-                style: TextStyle(fontSize: 10, color: Color(0xFFB0B0AD)),
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _tombolAbu(Icons.photo_camera_outlined, 'Foto Sampul', () {}),
+            _tombolAbu(
+              Icons.photo_camera_outlined,
+              'Foto Sampul',
+              () => ambilFoto(ImageSource.camera),
+            ),
             const SizedBox(width: 12),
-            _tombolAbu(Icons.upload_file_outlined, 'Unggah Foto', () {}),
+            _tombolAbu(
+              Icons.upload_file_outlined,
+              'Unggah Foto',
+              () => ambilFoto(ImageSource.gallery),
+            ),
           ],
         ),
+        // Tombol hapus hanya muncul kalau sudah ada foto
+        if (fotoSampul != null)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                fotoSampul = null;
+              });
+            },
+            child: const Text(
+              'Hapus foto',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
       ],
     );
   }
