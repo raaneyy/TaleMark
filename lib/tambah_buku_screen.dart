@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'app_theme.dart';
+import 'scan_book_page.dart';
 import 'widgets/auth_widgets.dart';
 
 class TambahBukuScreen extends StatefulWidget {
@@ -101,7 +102,6 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
           child: Form(
             key: formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -185,6 +185,29 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
     );
   }
 
+  // Buka halaman Pindai, lalu isi kolom ISBN dengan hasilnya
+  Future<void> pindaiIsbn() async {
+    final ScannedBook? hasil = await Navigator.push<ScannedBook>(
+      context,
+      MaterialPageRoute(builder: (_) => const ScanBookPage()),
+    );
+
+    // Kalau pengguna kembali tanpa memindai, hasilnya null.
+    // mounted = halaman ini masih terbuka (belum ditutup pengguna)
+    if (hasil == null || !mounted) return;
+
+    setState(() {
+      _isbnController.text = hasil.isbn;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('ISBN ${hasil.isbn} berhasil diisi dari hasil pindai'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   // 2. Pratinjau sampul buku dan tombol foto
   Widget _pratinjauSampul() {
     // Kalau kolom masih kosong, tampilkan tulisan contoh
@@ -204,8 +227,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
           padding: fotoSampul == null
               ? const EdgeInsets.all(16)
               : EdgeInsets.zero,
-          clipBehavior:
-              Clip.antiAlias, // foto terpotong otomatis, ngikutin bentuk yang membulat
+          clipBehavior: Clip.antiAlias, // foto terpotong otomatis, ngikutin bentuk yang membulat
           decoration: BoxDecoration(
             color: const Color(0xFFEDEDEB),
             borderRadius: BorderRadius.circular(8),
@@ -361,13 +383,14 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
         ),
         TextFormField(
           controller: _isbnController,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: 'Contoh: 978-602-03-8594-5',
             suffixIcon: Padding(
               padding: const EdgeInsets.all(6),
               child: TextButton.icon(
-                onPressed: () {}, // Tahap 4: buka halaman Pindai
+                onPressed: pindaiIsbn, // buka halaman Pindai
                 icon: const Icon(Icons.qr_code_scanner, size: 16),
                 label: const Text('Pindai'),
                 style: TextButton.styleFrom(
@@ -395,6 +418,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
         _label('Judul Lengkap Buku', wajib: true),
         TextFormField(
           controller: _judulController,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: const InputDecoration(
             hintText: 'Masukkan judul lengkap beserta subjudul...',
           ),
@@ -412,6 +436,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
         _label('Penulis / Pengarang Utama', wajib: true),
         TextFormField(
           controller: _penulisController,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: const InputDecoration(
             hintText: 'Misal: Pramoedya Ananta Toer',
           ),
@@ -451,6 +476,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
                   _label('Tahun Terbit'),
                   TextFormField(
                     controller: _tahunController,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(hintText: '2024'),
                     validator: (String? value) {
@@ -486,6 +512,7 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
         _label('Total Halaman', wajib: true),
         TextFormField(
           controller: _halamanController,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
             hintText: 'Misal: 384',
