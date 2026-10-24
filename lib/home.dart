@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'scan_book_page.dart';
 import 'timer_screen.dart';
 import 'tambah_buku_screen.dart';
+import 'library_screen.dart';
+import 'feed.dart';
+import 'widgets/statistik.dart';
+import 'account_screen.dart';
 
 void main() => runApp(const TaleMarkApp());
 
@@ -235,81 +240,105 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: IndexedStack(
+        index: _tab,
         children: [
-          SafeArea(
-            bottom: false,
-            child: ListView(
-              padding: const EdgeInsets.only(bottom: 90),
-              children: [
-                const _Header(),
-                _SearchBar(onScan: _openScanner),
-                const SizedBox(height: 10),
-                _buildChips(),
-                const SizedBox(height: 14),
-                _ScanCard(onTap: _openScanner),
-                const SizedBox(height: 20),
-                const _SectionTitle(
-                  eyebrow: 'SELECTED EDITION',
-                  title: 'Recommendation',
-                ),
-                const SizedBox(height: 10),
-                const _FeaturedCard(),
-                const SizedBox(height: 22),
-                const SizedBox(height: 10),
-                _buildAffinityList(),
-                const SizedBox(height: 22),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Trending Now',
-                    style: TextStyle(
-                      fontFamily: kSerif,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
+          // Tab 0: Home
+          Stack(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: ListView(
+                  padding: const EdgeInsets.only(bottom: 90),
+                  children: [
+                    const _Header(),
+                    _SearchBar(onScan: _openScanner),
+                    const SizedBox(height: 10),
+                    _buildChips(),
+                    const SizedBox(height: 14),
+                    _ScanCard(onTap: _openScanner),
+                    const SizedBox(height: 20),
+                    const _SectionTitle(
+                      eyebrow: 'SELECTED EDITION',
+                      title: 'Recommendation',
                     ),
+                    const SizedBox(height: 10),
+                    const _FeaturedCard(),
+                    const SizedBox(height: 22),
+                    const SizedBox(height: 10),
+                    _buildAffinityList(),
+                    const SizedBox(height: 22),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Trending Now',
+                        style: TextStyle(
+                          fontFamily: kSerif,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    for (final b in trending) _TrendingTile(book: b),
+                  ],
+                ),
+              ),
+              // area transparan: tap di luar menu untuk menutup
+              if (_menuOpen)
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _closeMenu,
+                    child: const SizedBox.expand(),
                   ),
                 ),
-                const SizedBox(height: 10),
-                for (final b in trending) _TrendingTile(book: b),
-              ],
-            ),
-          ),
-          // area transparan: tap di luar menu untuk menutup
-          if (_menuOpen)
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _closeMenu,
-                child: const SizedBox.expand(),
+              // menu pop up di atas tombol + (FAB 50 + margin 16 + jarak 8)
+              Positioned(
+                right: 16,
+                bottom: 16 + 50 + 8,
+                child: _buildFabMenu(),
               ),
-            ),
-          // menu pop up di atas tombol + (FAB 50 + margin 16 + jarak 8)
-          Positioned(right: 16, bottom: 16 + 50 + 8, child: _buildFabMenu()),
+            ],
+          ),
+          // Tab 1–4: halaman lain (bottom nav bawaannya dimatikan)
+          const LibraryScreen(showBottomNav: false),
+          const FeedPage(),
+          const StatsScreen(showBottomNav: false),
+          const AccountScreen(showBottomNav: false),
         ],
       ),
-      floatingActionButton: SizedBox(
-        width: 50,
-        height: 50,
-        child: FloatingActionButton(
-          onPressed: _toggleMenu,
-          backgroundColor: kInk,
-          foregroundColor: Colors.white,
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: AnimatedRotation(
-            turns: _menuOpen ? 0.125 : 0, // + berputar jadi ×
-            duration: const Duration(milliseconds: 160),
-            child: const Icon(Icons.add, size: 24),
-          ),
-        ),
-      ),
+      floatingActionButton: _tab == 0
+          ? SizedBox(
+              width: 50,
+              height: 50,
+              child: FloatingActionButton(
+                onPressed: _toggleMenu,
+                backgroundColor: kInk,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: AnimatedRotation(
+                  turns: _menuOpen ? 0.125 : 0, // + berputar jadi ×
+                  duration: const Duration(milliseconds: 160),
+                  child: const Icon(Icons.add, size: 24),
+                ),
+              ),
+            )
+          : null, // tombol + hanya muncul di tab Home
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         height: 62,
-        onDestinationSelected: (i) => setState(() => _tab = i),
+        onDestinationSelected: (i) {
+          setState(() {
+            _tab = i;
+            _menuOpen = false; // tutup menu + kalau masih terbuka
+          });
+        },
+        backgroundColor: kBg,
+        indicatorColor: kChip,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined, size: 22),
