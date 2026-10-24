@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'scan_book_page.dart';
+import 'timer_screen.dart';
 
 void main() => runApp(const TaleMarkApp());
 
@@ -136,11 +137,12 @@ class _HomeScreenState extends State<HomeScreen> {
         .showSnackBar(const SnackBar(content: Text('Add Book dipilih')));
   }
 
-  void _onSetTimer() {
+    void _onSetTimer() {
     _closeMenu();
-    // TODO: arahkan ke halaman Pomodoro / Set Timer
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Set Timer dipilih')));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TimerScreen()),
+    );
   }
 
   Widget _menuItem(IconData icon, String label, VoidCallback onTap) {
