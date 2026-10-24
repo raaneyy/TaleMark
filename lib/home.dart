@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'scan_book_page.dart';
 import 'timer_screen.dart';
+import 'tambah_buku_screen.dart';
 
 void main() => runApp(const TaleMarkApp());
 
@@ -28,12 +29,15 @@ class TaleMarkApp extends StatelessWidget {
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: kBg,
           indicatorColor: Colors.transparent,
-          labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
-                fontSize: 11,
-                fontWeight:
-                    s.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-                color: s.contains(WidgetState.selected) ? kInk : kMuted,
-              )),
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (s) => TextStyle(
+              fontSize: 11,
+              fontWeight: s.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: s.contains(WidgetState.selected) ? kInk : kMuted,
+            ),
+          ),
         ),
       ),
       home: const HomeScreen(),
@@ -64,33 +68,54 @@ class Book {
 }
 
 const kaftaPicks = [
-  Book(title: 'The Trial', author: 'Franz Kafka', rating: 4.3, pages: 228, match: 98),
-  Book(title: 'The Stranger', author: 'Albert Camus', rating: 4.5, pages: 123, match: 94),
-  Book(title: 'Blindness', author: 'José Saramago', rating: 4.2, pages: 352, match: 91),
+  Book(
+    title: 'The Trial',
+    author: 'Franz Kafka',
+    rating: 4.3,
+    pages: 228,
+    match: 98,
+  ),
+  Book(
+    title: 'The Stranger',
+    author: 'Albert Camus',
+    rating: 4.5,
+    pages: 123,
+    match: 94,
+  ),
+  Book(
+    title: 'Blindness',
+    author: 'José Saramago',
+    rating: 4.2,
+    pages: 352,
+    match: 91,
+  ),
 ];
 
 const trending = [
   Book(
-      title: "If on a winter's night a traveler",
-      author: 'Italo Calvino',
-      genre: 'METANARRATIVE',
-      rating: 4.6,
-      pages: 260,
-      friends: '14 friends read this'),
+    title: "If on a winter's night a traveler",
+    author: 'Italo Calvino',
+    genre: 'METANARRATIVE',
+    rating: 4.6,
+    pages: 260,
+    friends: '14 friends read this',
+  ),
   Book(
-      title: 'Ficciones',
-      author: 'Jorge Luis Borges',
-      genre: 'SHORT STORIES',
-      rating: 4.7,
-      pages: 174,
-      note: 'Philosophical canon'),
+    title: 'Ficciones',
+    author: 'Jorge Luis Borges',
+    genre: 'SHORT STORIES',
+    rating: 4.7,
+    pages: 174,
+    note: 'Philosophical canon',
+  ),
   Book(
-      title: 'The Myth of Sisyphus',
-      author: 'Albert Camus',
-      genre: 'ESSAY · EXISTENTIALISM',
-      rating: 4.5,
-      pages: 212,
-      note: 'Trending this week'),
+    title: 'The Myth of Sisyphus',
+    author: 'Albert Camus',
+    genre: 'ESSAY · EXISTENTIALISM',
+    rating: 4.5,
+    pages: 212,
+    note: 'Trending this week',
+  ),
 ];
 
 // ───────────────────────── Home Screen ─────────────────────────
@@ -131,13 +156,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onAddBook() {
     _closeMenu();
-    // TODO: arahkan ke halaman Tambah Buku, mis.
-    // Navigator.push(context, MaterialPageRoute(builder: (_) => const AddBookPage()));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Add Book dipilih')));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TambahBukuScreen()),
+    );
   }
 
-    void _onSetTimer() {
+  void _onSetTimer() {
     _closeMenu();
     Navigator.push(
       context,
@@ -156,9 +181,14 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 10),
-            Text(label,
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
@@ -186,7 +216,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _menuItem(Icons.qr_code_scanner, 'Scan Barcode', _openScanner),
+                  _menuItem(
+                    Icons.qr_code_scanner,
+                    'Scan Barcode',
+                    _openScanner,
+                  ),
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
                 ],
@@ -215,7 +249,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 _ScanCard(onTap: _openScanner),
                 const SizedBox(height: 20),
-                const _SectionTitle(eyebrow: 'SELECTED EDITION', title: 'Recommendation'),
+                const _SectionTitle(
+                  eyebrow: 'SELECTED EDITION',
+                  title: 'Recommendation',
+                ),
                 const SizedBox(height: 10),
                 const _FeaturedCard(),
                 const SizedBox(height: 22),
@@ -224,9 +261,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 22),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('Trending Now',
-                      style: TextStyle(
-                          fontFamily: kSerif, fontSize: 20, fontWeight: FontWeight.w600)),
+                  child: Text(
+                    'Trending Now',
+                    style: TextStyle(
+                      fontFamily: kSerif,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 10),
                 for (final b in trending) _TrendingTile(book: b),
@@ -254,7 +296,9 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: kInk,
           foregroundColor: Colors.white,
           elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
           child: AnimatedRotation(
             turns: _menuOpen ? 0.125 : 0, // + berputar jadi ×
             duration: const Duration(milliseconds: 160),
@@ -268,25 +312,30 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (i) => setState(() => _tab = i),
         destinations: const [
           NavigationDestination(
-              icon: Icon(Icons.home_outlined, size: 22),
-              selectedIcon: Icon(Icons.home, size: 22),
-              label: 'Home'),
+            icon: Icon(Icons.home_outlined, size: 22),
+            selectedIcon: Icon(Icons.home, size: 22),
+            label: 'Home',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined, size: 22),
-              selectedIcon: Icon(Icons.menu_book, size: 22),
-              label: 'Library'),
+            icon: Icon(Icons.menu_book_outlined, size: 22),
+            selectedIcon: Icon(Icons.menu_book, size: 22),
+            label: 'Library',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.explore_outlined, size: 22),
-              selectedIcon: Icon(Icons.explore, size: 22),
-              label: 'Feed'),
+            icon: Icon(Icons.explore_outlined, size: 22),
+            selectedIcon: Icon(Icons.explore, size: 22),
+            label: 'Feed',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.bar_chart_outlined, size: 22),
-              selectedIcon: Icon(Icons.bar_chart, size: 22),
-              label: 'Stats'),
+            icon: Icon(Icons.bar_chart_outlined, size: 22),
+            selectedIcon: Icon(Icons.bar_chart, size: 22),
+            label: 'Stats',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.account_circle_outlined, size: 22),
-              selectedIcon: Icon(Icons.account_circle, size: 22),
-              label: 'Account'),
+            icon: Icon(Icons.account_circle_outlined, size: 22),
+            selectedIcon: Icon(Icons.account_circle, size: 22),
+            label: 'Account',
+          ),
         ],
       ),
     );
@@ -323,7 +372,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ActionChip(
             avatar: const Icon(Icons.tune, size: 14, color: kMuted),
-            label: const Text('More', style: TextStyle(color: kMuted, fontSize: 12)),
+            label: const Text(
+              'More',
+              style: TextStyle(color: kMuted, fontSize: 12),
+            ),
             onPressed: () {},
             backgroundColor: kChip,
             side: BorderSide.none,
@@ -369,21 +421,35 @@ class _Header extends StatelessWidget {
             fit: BoxFit.contain,
           ),
           const SizedBox(width: 8),
-          const Text('TaleMark',
-              style: TextStyle(fontFamily: kSerif, fontSize: 20, fontWeight: FontWeight.w600)),
+          const Text(
+            'TaleMark',
+            style: TextStyle(
+              fontFamily: kSerif,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const Spacer(),
           Stack(
             children: [
               IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.notifications_none, size: 24, color: kMuted)),
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.notifications_none,
+                  size: 24,
+                  color: kMuted,
+                ),
+              ),
               Positioned(
                 right: 10,
                 top: 8,
                 child: Container(
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(color: kInk, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: kInk,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ],
@@ -407,7 +473,13 @@ class _SearchBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: kCard,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 6, offset: Offset(0, 2))],
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -431,16 +503,19 @@ class _SearchBar extends StatelessWidget {
               height: 44,
               decoration: const BoxDecoration(
                 color: kChip,
-                borderRadius: BorderRadius.horizontal(right: Radius.circular(10)),
+                borderRadius: BorderRadius.horizontal(
+                  right: Radius.circular(10),
+                ),
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
                 tooltip: 'Scan Barcode',
-                onPressed: onScan ??
+                onPressed:
+                    onScan ??
                     () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ScanBookPage()),
-                        ),
+                      context,
+                      MaterialPageRoute(builder: (_) => const ScanBookPage()),
+                    ),
                 icon: const Icon(Icons.qr_code_scanner, size: 20),
               ),
             ),
@@ -466,11 +541,12 @@ class _ScanCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: onTap ??
+          onTap:
+              onTap ??
               () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ScanBookPage()),
-                  ),
+                context,
+                MaterialPageRoute(builder: (_) => const ScanBookPage()),
+              ),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -480,18 +556,39 @@ class _ScanCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(children: [
-                        Icon(Icons.photo_camera_outlined, size: 18, color: kInk),
-                        const SizedBox(width: 6),
-                        const Text('INSTANT SHELF SCAN',
-                            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8, fontSize: 11)),
-                      ]),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.photo_camera_outlined,
+                            size: 18,
+                            color: kInk,
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'INSTANT SHELF SCAN',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 6),
-                      const Text('Scan any book spine or barcode to log in seconds.',
-                          style: TextStyle(fontFamily: kSerif, fontSize: 15, fontWeight: FontWeight.w600, height: 1.25)),
+                      const Text(
+                        'Scan any book spine or barcode to log in seconds.',
+                        style: TextStyle(
+                          fontFamily: kSerif,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      const Text('Autofills publication date, page count, and editions.',
-                          style: TextStyle(color: kMuted, fontSize: 12)),
+                      const Text(
+                        'Autofills publication date, page count, and editions.',
+                        style: TextStyle(color: kMuted, fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
@@ -503,7 +600,11 @@ class _ScanCard extends StatelessWidget {
                     color: kChip,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.qr_code_scanner, size: 20, color: kInk),
+                  child: const Icon(
+                    Icons.qr_code_scanner,
+                    size: 20,
+                    color: kInk,
+                  ),
                 ),
               ],
             ),
@@ -519,7 +620,8 @@ class _ScanCard extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final String eyebrow, title;
   final bool small;
-  const _SectionTitle({required this.eyebrow, required this.title}) : small = false;
+  const _SectionTitle({required this.eyebrow, required this.title})
+    : small = false;
 
   @override
   Widget build(BuildContext context) {
@@ -528,13 +630,24 @@ class _SectionTitle extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(eyebrow,
-              style: const TextStyle(
-                  color: kMuted, letterSpacing: 1.0, fontSize: 11, fontWeight: FontWeight.w500)),
+          Text(
+            eyebrow,
+            style: const TextStyle(
+              color: kMuted,
+              letterSpacing: 1.0,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(title,
-              style: TextStyle(
-                  fontFamily: kSerif, fontSize: small ? 18 : 22, fontWeight: FontWeight.w600)),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: kSerif,
+              fontSize: small ? 18 : 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -555,7 +668,10 @@ class _Stars extends StatelessWidget {
         for (int i = 1; i <= 5; i++)
           Icon(i <= rating.round() ? Icons.star : Icons.star_border, size: 15),
         const SizedBox(width: 4),
-        Text(rating.toString(), style: const TextStyle(color: kMuted, fontSize: 13)),
+        Text(
+          rating.toString(),
+          style: const TextStyle(color: kMuted, fontSize: 13),
+        ),
       ],
     );
   }
@@ -573,7 +689,13 @@ class _CoverPlaceholder extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(6),
-        boxShadow: const [BoxShadow(color: Color(0x18000000), blurRadius: 6, offset: Offset(0, 2))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x18000000),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
     );
   }
@@ -590,7 +712,10 @@ class _FeaturedCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -609,26 +734,43 @@ class _FeaturedCard extends StatelessWidget {
                       colors: [Color(0xFF4FB4D8), Color(0xFFBEE6F2)],
                     ),
                     boxShadow: const [
-                      BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 3))
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      ),
                     ],
                   ),
-                  child: const Text('HUJAN',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1)),
+                  child: const Text(
+                    'HUJAN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
                 ),
                 Positioned(
                   left: 6,
                   top: 6,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration:
-                        BoxDecoration(color: kInk, borderRadius: BorderRadius.circular(4)),
-                    child: const Text('Staff',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w700, fontSize: 10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: kInk,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'Staff',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -638,13 +780,28 @@ class _FeaturedCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('FIKSI ILMIAH, DISTOPIA, ROMANCE',
-                      style: TextStyle(
-                          color: kMuted, fontSize: 10, letterSpacing: 0.8, fontWeight: FontWeight.w600)),
+                  const Text(
+                    'FIKSI ILMIAH, DISTOPIA, ROMANCE',
+                    style: TextStyle(
+                      color: kMuted,
+                      fontSize: 10,
+                      letterSpacing: 0.8,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 3),
-                  const Text('Hujan',
-                      style: TextStyle(fontFamily: kSerif, fontSize: 18, fontWeight: FontWeight.w600)),
-                  const Text('Tere Liye · 2016', style: TextStyle(color: kMuted, fontSize: 12)),
+                  const Text(
+                    'Hujan',
+                    style: TextStyle(
+                      fontFamily: kSerif,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Text(
+                    'Tere Liye · 2016',
+                    style: TextStyle(color: kMuted, fontSize: 12),
+                  ),
                   const SizedBox(height: 4),
                   const _Stars(4.4),
                   const SizedBox(height: 6),
@@ -653,7 +810,11 @@ class _FeaturedCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontStyle: FontStyle.italic, color: kMuted, fontSize: 11, height: 1.35),
+                      fontStyle: FontStyle.italic,
+                      color: kMuted,
+                      fontSize: 11,
+                      height: 1.35,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -663,15 +824,26 @@ class _FeaturedCard extends StatelessWidget {
                           height: 36,
                           child: FilledButton.icon(
                             onPressed: () {},
-                            icon: const Icon(Icons.bookmark_add_outlined, size: 16),
-                            label: const Text('+Library',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                            icon: const Icon(
+                              Icons.bookmark_add_outlined,
+                              size: 16,
+                            ),
+                            label: const Text(
+                              '+Library',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             style: FilledButton.styleFrom(
                               backgroundColor: kInk,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.horizontal(left: Radius.circular(8)),
+                                borderRadius: BorderRadius.horizontal(
+                                  left: Radius.circular(8),
+                                ),
                               ),
                             ),
                           ),
@@ -682,12 +854,15 @@ class _FeaturedCard extends StatelessWidget {
                         width: 38,
                         decoration: const BoxDecoration(
                           color: kChip,
-                          borderRadius: BorderRadius.horizontal(right: Radius.circular(8)),
+                          borderRadius: BorderRadius.horizontal(
+                            right: Radius.circular(8),
+                          ),
                         ),
                         child: IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () {},
-                            icon: const Icon(Icons.visibility_outlined, size: 18)),
+                          padding: EdgeInsets.zero,
+                          onPressed: () {},
+                          icon: const Icon(Icons.visibility_outlined, size: 18),
+                        ),
                       ),
                     ],
                   ),
@@ -716,8 +891,10 @@ class _AffinityCard extends StatelessWidget {
         children: [
           Container(
             height: 165,
-            decoration:
-                BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+              color: kCard,
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Stack(
               children: [
                 Positioned(
@@ -731,7 +908,9 @@ class _AffinityCard extends StatelessWidget {
                       customBorder: const CircleBorder(),
                       onTap: () {},
                       child: const Padding(
-                          padding: EdgeInsets.all(5), child: Icon(Icons.add, size: 16)),
+                        padding: EdgeInsets.all(5),
+                        child: Icon(Icons.add, size: 16),
+                      ),
                     ),
                   ),
                 ),
@@ -739,26 +918,44 @@ class _AffinityCard extends StatelessWidget {
                   left: 6,
                   bottom: 6,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration:
-                        BoxDecoration(color: kInk, borderRadius: BorderRadius.circular(4)),
-                    child: Text('${book.match}% match',
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w600, fontSize: 10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: kInk,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${book.match}% match',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 6),
-          Text(book.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: kSerif, fontSize: 14, fontWeight: FontWeight.w600)),
-          Text(book.author,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: kMuted, fontSize: 11)),
+          Text(
+            book.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: kSerif,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(
+            book.author,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: kMuted, fontSize: 11),
+          ),
           const SizedBox(height: 3),
           Row(
             children: [
@@ -766,7 +963,10 @@ class _AffinityCard extends StatelessWidget {
               const SizedBox(width: 3),
               Text('${book.rating}', style: const TextStyle(fontSize: 12)),
               const Spacer(),
-              Text('${book.pages}p', style: const TextStyle(color: kMuted, fontSize: 11)),
+              Text(
+                '${book.pages}p',
+                style: const TextStyle(color: kMuted, fontSize: 11),
+              ),
             ],
           ),
         ],
@@ -787,7 +987,10 @@ class _TrendingTile extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -802,53 +1005,81 @@ class _TrendingTile extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(book.genre,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: kMuted,
-                                  fontSize: 10,
-                                  letterSpacing: 0.8,
-                                  fontWeight: FontWeight.w600)),
+                          child: Text(
+                            book.genre,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: kMuted,
+                              fontSize: 10,
+                              letterSpacing: 0.8,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                         const Icon(Icons.star_border, size: 14),
                         const SizedBox(width: 2),
-                        Text('${book.rating}', style: const TextStyle(fontSize: 11)),
+                        Text(
+                          '${book.rating}',
+                          style: const TextStyle(fontSize: 11),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Text(book.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontFamily: kSerif, fontSize: 15, fontWeight: FontWeight.w600, height: 1.15)),
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: kSerif,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        height: 1.15,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text('${book.author} · ${book.pages} pages',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: kMuted, fontSize: 11)),
+                    Text(
+                      '${book.author} · ${book.pages} pages',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: kMuted, fontSize: 11),
+                    ),
                     const Spacer(),
                     Row(
                       children: [
                         Expanded(
-                          child: Text(book.friends ?? book.note ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: kMuted, fontWeight: FontWeight.w600, fontSize: 10)),
+                          child: Text(
+                            book.friends ?? book.note ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: kMuted,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                         SizedBox(
                           height: 30,
                           child: FilledButton.tonalIcon(
                             onPressed: () {},
-                            icon: const Icon(Icons.bookmark_add_outlined, size: 14),
-                            label: const Text('Add', style: TextStyle(fontSize: 11)),
+                            icon: const Icon(
+                              Icons.bookmark_add_outlined,
+                              size: 14,
+                            ),
+                            label: const Text(
+                              'Add',
+                              style: TextStyle(fontSize: 11),
+                            ),
                             style: FilledButton.styleFrom(
                               backgroundColor: kChip,
                               foregroundColor: kInk,
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               visualDensity: VisualDensity.compact,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6)),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
                             ),
                           ),
                         ),
