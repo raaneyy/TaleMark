@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'app_theme.dart';
+import 'widgets/talemark_dialog.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
@@ -96,7 +97,7 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   // Akhiri sesi membaca (konfirmasi)
-  void stopTimer() {
+  Future<void> stopTimer() async {
     bool tadiBerjalan = sedangBerjalan; // ingat: tadi timer jalan atau tidak
     _timer?.cancel();
     setState(() {
@@ -105,33 +106,31 @@ class _TimerScreenState extends State<TimerScreen> {
 
     int detikDibaca = targetMenit * 60 - sisaDetik;
 
-    showDialog(
+    final String? pilihan = await showTaleMarkDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Akhiri sesi membaca?'),
-        content: Text('Kamu sudah membaca selama ${formatWaktu(detikDibaca)}.'),
-        actions: [
-          // Tombol: Lanjutkan nanti bakal tutup dialog, jalanin lagi timer kalau tadi berjalan
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              if (tadiBerjalan) {
-                mulaiAtauJeda();
-              }
-            },
-            child: const Text('Lanjutkan'),
-          ),
-          // Tombol: Akhiri nanti bakal tutup dialog, balikin mereka ke Home
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
-            child: const Text('Akhiri'),
-          ),
-        ],
-      ),
+      judul: 'Akhiri sesi membaca?',
+      pesan: 'Kamu sudah membaca selama ${formatWaktu(detikDibaca)}.',
+      tombol: [
+        TombolDialogUtama(
+          label: 'Akhiri sesi',
+          icon: Icons.stop_rounded,
+          onPressed: () => Navigator.pop(context, 'akhiri'),
+        ),
+        TombolDialogKedua(
+          label: 'Lanjutkan membaca',
+          onPressed: () => Navigator.pop(context, 'lanjut'),
+        ),
+      ],
     );
+
+    if (!mounted) return; // halaman sudah ditutup, tidak perlu lanjut
+
+    if (pilihan == 'akhiri') {
+      Navigator.pop(context); // kembali ke Home
+    } else if (tadiBerjalan) {
+      // "Lanjutkan", tombol ←, atau ketuk di luar kotak → timer jalan lagi
+      mulaiAtauJeda();
+    }
   }
 
   // Matikan timer pas halaman ditutup
@@ -158,52 +157,52 @@ class _TimerScreenState extends State<TimerScreen> {
     // Isi awal kolom dengan durasi yang sedang dipakai
     _durasiController.text = targetMenit.toString();
 
-    showDialog(
+    showTaleMarkDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Atur durasi membaca'),
-        content: Form(
-          key: _durasiFormKey,
-          child: TextFormField(
-            controller: _durasiController,
-            keyboardType: TextInputType.number,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Contoh: 30',
-              suffixText: 'menit',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Durasi tidak boleh kosong';
-              }
-              int? menit = int.tryParse(value);
-              if (menit == null) return 'Masukkan angka bulat, contoh: 30';
-              if (menit < 1) return 'Minimal 1 menit';
-              if (menit > 180) return 'Maksimal 180 menit';
-              return null;
-            },
+      judul: 'Atur durasi membaca',
+      pesan: 'Masukkan durasi antara 1 sampai 180 menit.',
+      isi: Form(
+        key: _durasiFormKey,
+        child: TextFormField(
+          controller: _durasiController,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          textAlign: TextAlign.center,
+          decoration: const InputDecoration(
+            hintText: 'Contoh: 30',
+            suffixText: 'menit',
           ),
+          validator: (String? value) {
+            if (value == null || value.isEmpty) {
+              return 'Durasi tidak boleh kosong';
+            }
+            int? menit = int.tryParse(value);
+            if (menit == null) return 'Masukkan angka bulat, contoh: 30';
+            if (menit < 1) return 'Minimal 1 menit';
+            if (menit > 180) return 'Maksimal 180 menit';
+            return null;
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (_durasiFormKey.currentState!.validate()) {
-                int menit = int.parse(_durasiController.text);
-                setState(() {
-                  targetMenit = menit;
-                  sisaDetik = menit * 60;
-                });
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
       ),
+      tombol: [
+        TombolDialogUtama(
+          label: 'Simpan',
+          onPressed: () {
+            if (_durasiFormKey.currentState!.validate()) {
+              int menit = int.parse(_durasiController.text);
+              setState(() {
+                targetMenit = menit;
+                sisaDetik = menit * 60;
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        TombolDialogKedua(
+          label: 'Batal',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
     );
   }
 
@@ -249,8 +248,8 @@ class _TimerScreenState extends State<TimerScreen> {
                   child: Text(
                     'Reading: $judulBuku · $penulis',
                     style: const TextStyle(fontSize: 12),
-                    overflow:
-                        TextOverflow.ellipsis, // teksnya kalau kepanjangan jadi ...
+                    overflow: TextOverflow
+                        .ellipsis, // teksnya kalau kepanjangan jadi ...
                   ),
                 ),
               ],
@@ -371,8 +370,10 @@ class _TimerScreenState extends State<TimerScreen> {
 
   // kartu progres buku
   Widget _kartuProgres() {
-    double progres = halamanSekarang / totalHalaman; // contohnya kalau 238/304 = 0.78
-    int persen = (progres * 100).round(); // hasilnya bisa dibulatin kayak gini 78
+    double progres =
+        halamanSekarang / totalHalaman; // contohnya kalau 238/304 = 0.78
+    int persen = (progres * 100)
+        .round(); // hasilnya bisa dibulatin kayak gini 78
 
     return Container(
       padding: const EdgeInsets.all(16),
