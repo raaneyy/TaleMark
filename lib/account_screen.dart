@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'login_screen.dart';
+import 'widgets/setting_screen.dart';
+
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
 const _kCard = Colors.white;
@@ -196,7 +199,25 @@ class _ProfileCard extends StatelessWidget {
                 ],
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(
+                        onLogout: () {
+                          // Keluar: buka halaman Login dan hapus semua halaman sebelumnya
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.tune_rounded,
                   size: 22, // was 26
