@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../app_theme.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
@@ -151,23 +153,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _confirmLogout() async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text(
-          'Keluar dari akun?',
-          style: TextStyle(fontFamily: _kSerif, fontSize: 22),
+      barrierColor: Colors.black12,
+      builder: (ctx) => BackdropFilter(
+        // Latar belakang diburamkan, sama seperti dialog Lupa Password
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Dialog(
+          backgroundColor: Colors.white,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Tombol kembali (←) di kiri atas
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    icon: const Icon(Icons.arrow_back, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Keluar dari akun?',
+                  style: AppTheme.serif(size: 26),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Kamu perlu masuk lagi untuk melanjutkan membaca.',
+                  style: TextStyle(fontSize: 14, color: AppTheme.muted),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                // Tombol utama: hitam (mengikuti tema TaleMark)
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  icon: const Icon(Icons.logout_rounded, size: 18),
+                  label: const Text('Ya, keluar'),
+                ),
+                const SizedBox(height: 8),
+                // Tombol kedua: abu-abu
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppTheme.fieldColor,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Tetap masuk'),
+                ),
+              ],
+            ),
+          ),
         ),
-        content: const Text('Kamu perlu masuk lagi untuk melanjutkan membaca.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: _kDanger),
-            child: const Text('Keluar'),
-          ),
-        ],
       ),
     );
     if (ok == true && mounted) {
