@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'library_screen.dart'; // BookModel & BookQuote didefinisikan di file ini
+import 'library_screen.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
