@@ -58,6 +58,8 @@ flutter:
     - assets/images/logo_talemark.png
     - assets/images/google_logo.png
     - assets/images/talemark_logo.jpg
+    - assets/images/hujan.jpeg
+    - assets/images/aldebaran.jpeg
 
   fonts:
     - family: Inter

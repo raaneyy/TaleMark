@@ -99,7 +99,7 @@ final List<BookModel> _allBooks = [
     genre: 'History',
     coverTopColor: Color(0xFF4FB4D8),
     coverBottomColor: Color(0xFFBEE6F2),
-    coverAsset: 'assets/covers/hujan.png',
+    coverAsset: 'assets/images/hujan.jpeg',
     progress: 0.24,
     totalPages: 320,
     currentPage: 77,
@@ -119,7 +119,7 @@ final List<BookModel> _allBooks = [
     genre: 'Essays',
     coverTopColor: Color(0xFF3F8F78),
     coverBottomColor: Color(0xFF16402F),
-    coverAsset: 'assets/covers/aldebaran.png',
+    coverAsset: 'assets/images/aldebaran.jpeg',
     progress: 0.0,
     totalPages: 400,
     currentPage: 0,
@@ -250,7 +250,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 child: Image.asset(
                   'assets/images/logo_talemark.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Icon(
+                  errorBuilder: (_, __, ___) => const Icon(
                     Icons.auto_stories_rounded,
                     size: 20,
                     color: _kInk,
@@ -676,7 +676,7 @@ void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (_, _, _) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, _, child) =>
+      transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),

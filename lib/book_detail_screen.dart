@@ -33,7 +33,7 @@ void main() {
           readers: 1240,
           coverTopColor: const Color(0xFF4FB4D8),
           coverBottomColor: const Color(0xFFBEE6F2),
-          coverAsset: 'assets/covers/hujan.png',
+          coverAsset: 'assets/images/hujan.jpeg',
           progress: 0.24,
           totalPages: 320,
           currentPage: 77,
@@ -292,7 +292,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     : Image.asset(
                         book.coverAsset!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => fallback,
+                        errorBuilder: (_, __, ___) => fallback,
                       ),
               ),
               Positioned(
@@ -644,13 +644,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
           ),
           const SizedBox(height: 12),
+          // Tombol full-width; ikon + teks otomatis di tengah.
           SizedBox(
+            width: double.infinity,
             height: 46,
             child: ElevatedButton.icon(
               onPressed: _saveProgress,
               icon: const Icon(Icons.bookmark_added_outlined, size: 18),
               label: const Text(
                 'Save reading progress',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: _kSans,
                   fontSize: 14,
@@ -661,6 +664,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 elevation: 0,
+                alignment: Alignment.center,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
