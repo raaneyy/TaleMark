@@ -39,11 +39,42 @@ const _reportReasons = [
 //  1. FEED PAGE
 // ═══════════════════════════════════════════════════════════════
 
-class FeedPage extends StatelessWidget {
+class FeedPage extends StatefulWidget {
   const FeedPage({super.key});
 
   @override
+  State<FeedPage> createState() => _FeedPageState();
+}
+
+class _FeedPageState extends State<FeedPage> {
+  /// Handle akun yang diblokir (postingannya disembunyikan dari feed).
+  final Set<String> _blocked = {};
+
+  void _blockUser(String handle, String name) {
+    if (!mounted) return;
+    // TODO: kirim permintaan blokir ke backend
+    setState(() => _blocked.add(handle));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$name diblokir'),
+          action: SnackBarAction(
+            label: 'Urungkan',
+            onPressed: () {
+              // TODO: batalkan blokir di backend
+              if (mounted) setState(() => _blocked.remove(handle));
+            },
+          ),
+        ),
+      );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final julianBlocked = _blocked.contains('@julianm');
+    final marcusBlocked = _blocked.contains('@marcusread');
+
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
@@ -82,16 +113,25 @@ class FeedPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const _Composer(),
-            const SizedBox(height: 16),
-            const _QuotePostCard(
-              name: 'Julian Mahesa',
-              handle: '@julianm',
-              time: '2 JAM LALU',
-              showReadingLabel: true,
-              avatarColors: [Color(0xFF5B3A29), Color(0xFFB08968)],
-            ),
-            const SizedBox(height: 16),
-            const _DiscussionPostCard(),
+            if (!julianBlocked) ...[
+              const SizedBox(height: 16),
+              _QuotePostCard(
+                name: 'Julian Mahesa',
+                handle: '@julianm',
+                time: '2 JAM LALU',
+                showReadingLabel: true,
+                avatarColors: const [Color(0xFF5B3A29), Color(0xFFB08968)],
+                onBlock: () => _blockUser('@julianm', 'Julian Mahesa'),
+              ),
+            ],
+            if (!marcusBlocked) ...[
+              const SizedBox(height: 16),
+              _DiscussionPostCard(
+                onBlock: () => _blockUser('@marcusread', 'Marcus Chen'),
+              ),
+            ],
+            if (julianBlocked && marcusBlocked)
+              _BlockedNotice(onReset: () => setState(_blocked.clear)),
           ],
         ),
       ),
@@ -221,7 +261,9 @@ class _Composer extends StatelessWidget {
 }
 
 class _DiscussionPostCard extends StatelessWidget {
-  const _DiscussionPostCard();
+  final VoidCallback? onBlock;
+
+  const _DiscussionPostCard({this.onBlock});
 
   @override
   Widget build(BuildContext context) {
@@ -291,8 +333,12 @@ class _DiscussionPostCard extends StatelessWidget {
                   bold: true,
                 ),
                 const SizedBox(width: 2),
-                // Titik tiga: Laporkan postingan
-                const _PostMenuButton(author: 'Marcus Chen'),
+                // Titik tiga: Laporkan postingan / Blokir akun
+                _PostMenuButton(
+                  author: 'Marcus Chen',
+                  handle: '@marcusread',
+                  onBlock: onBlock,
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -548,13 +594,15 @@ class _ProfilePageState extends State<ProfilePage> {
               labels: ['Semua Feed', 'Catatan & Kutipan', 'Ulasan Buku'],
             ),
             const SizedBox(height: 10),
-            const _QuotePostCard(
+            _QuotePostCard(
               name: 'Julian Mahesa',
               handle: '@julianm',
               time: '2 JAM LALU',
               bigQuote: true,
               linkToProfile: false, // sudah di halaman profil
-              avatarColors: [Color(0xFF7CB342), Color(0xFF81D4FA)],
+              avatarColors: const [Color(0xFF7CB342), Color(0xFF81D4FA)],
+              // Setelah diblokir, kembali ke feed; feed yang menyembunyikan akunnya
+              onBlock: () => Navigator.of(context).maybePop(true),
             ),
           ],
         ),
@@ -616,6 +664,7 @@ class _QuotePostCard extends StatelessWidget {
   final bool bigQuote;
   final bool linkToProfile;
   final List<Color> avatarColors;
+  final VoidCallback? onBlock;
 
   const _QuotePostCard({
     required this.name,
@@ -625,6 +674,7 @@ class _QuotePostCard extends StatelessWidget {
     this.showReadingLabel = false,
     this.bigQuote = false,
     this.linkToProfile = true,
+    this.onBlock,
   });
 
   @override
@@ -647,11 +697,15 @@ class _QuotePostCard extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: linkToProfile
-                        ? () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ProfilePage(),
-                            ),
-                          )
+                        ? () async {
+                            final blocked = await Navigator.of(context)
+                                .push<bool>(
+                                  MaterialPageRoute(
+                                    builder: (_) => const ProfilePage(),
+                                  ),
+                                );
+                            if (blocked == true) onBlock?.call();
+                          }
                         : null,
                     child: Row(
                       children: [
@@ -708,7 +762,7 @@ class _QuotePostCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                _PostMenuButton(author: name),
+                _PostMenuButton(author: name, handle: handle, onBlock: onBlock),
               ],
             ),
             const SizedBox(height: 12),
@@ -1129,7 +1183,23 @@ class _HujanCover extends StatelessWidget {
 /// Saat ditekan muncul menu "Laporkan"; memilihnya membuka popup alasan.
 class _PostMenuButton extends StatelessWidget {
   final String author;
-  const _PostMenuButton({required this.author});
+  final String handle;
+  final VoidCallback? onBlock;
+
+  const _PostMenuButton({
+    required this.author,
+    required this.handle,
+    this.onBlock,
+  });
+
+  Future<void> _onSelected(BuildContext context, String value) async {
+    if (value == 'report') {
+      await showReportDialog(context, author: author);
+    } else if (value == 'block') {
+      final ok = await showBlockDialog(context, author: author, handle: handle);
+      if (ok == true) onBlock?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1142,11 +1212,9 @@ class _PostMenuButton extends StatelessWidget {
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       icon: const Icon(Icons.more_horiz, color: _muted, size: 24),
-      onSelected: (value) {
-        if (value == 'report') showReportDialog(context, author: author);
-      },
-      itemBuilder: (_) => const [
-        PopupMenuItem<String>(
+      onSelected: (value) => _onSelected(context, value),
+      itemBuilder: (_) => [
+        const PopupMenuItem<String>(
           value: 'report',
           child: Row(
             children: [
@@ -1163,7 +1231,181 @@ class _PostMenuButton extends StatelessWidget {
             ],
           ),
         ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
+          value: 'block',
+          child: Row(
+            children: [
+              const Icon(Icons.block, size: 20, color: _danger),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  'Blokir $handle',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: _danger,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// Dialog konfirmasi blokir akun. Mengembalikan true jika pengguna menekan "Blokir".
+Future<bool?> showBlockDialog(
+  BuildContext context, {
+  required String author,
+  required String handle,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => Dialog(
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFDECEA),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.block, color: _danger, size: 26),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Blokir $author?',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: _serif,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Postingan $handle tidak akan muncul lagi di feed-mu, dan akun ini '
+                'tidak bisa melihat profil maupun berinteraksi dengan kutipanmu.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: _muted,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      style: TextButton.styleFrom(
+                        backgroundColor: _chip,
+                        foregroundColor: _ink,
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text('Batal'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _danger,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(0, 46),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: const Text('Blokir'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Ditampilkan di feed saat semua akun yang ada sudah diblokir.
+class _BlockedNotice extends StatelessWidget {
+  final VoidCallback onReset;
+  const _BlockedNotice({required this.onReset});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.block, size: 30, color: _muted),
+            const SizedBox(height: 10),
+            const Text(
+              'Semua postingan tersembunyi',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: _serif,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Akun yang kamu blokir tidak ditampilkan di feed.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: _muted, fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: onReset,
+              style: TextButton.styleFrom(foregroundColor: _ink),
+              child: const Text(
+                'Buka blokir semua',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
