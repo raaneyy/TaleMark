@@ -602,7 +602,7 @@ class _FavBookTile extends StatelessWidget {
   }
 }
 
-// ─────────────────────── Genre card ───────────────────────
+// Bagian Kartu Genre di Statistik
 class _GenreCard extends StatelessWidget {
   const _GenreCard();
 
@@ -615,6 +615,48 @@ class _GenreCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+        // ── Judul kartu (dipindah ke atas) ──
+          const Text(
+            'Preferensi Bacaan',
+            style: TextStyle(
+              fontFamily: _kSerif,
+              fontSize: 19,
+              fontWeight: FontWeight.w500,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'GENRE & TEMATIK',
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.1,
+              color: _kBody,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Garis persentase semua genre ──
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: SizedBox(
+              height: 8,
+              child: Row(
+                children: [
+                  for (final g in _genres)
+                    Expanded(
+                      flex: g.percent,
+                      child: Container(color: g.color),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // ── Daftar genre (sekarang di bawah judul) ──
           for (final g in _genres)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
@@ -663,43 +705,6 @@ class _GenreCard extends StatelessWidget {
                 ],
               ),
             ),
-          const SizedBox(height: 14),
-          const Text(
-            'GENRE & TEMATIK',
-            style: TextStyle(
-              fontFamily: _kSans,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.1,
-              color: _kBody,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Preferensi Bacaan',
-            style: TextStyle(
-              fontFamily: _kSerif,
-              fontSize: 19,
-              fontWeight: FontWeight.w500,
-              color: _kInk,
-            ),
-          ),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: SizedBox(
-              height: 8,
-              child: Row(
-                children: [
-                  for (final g in _genres)
-                    Expanded(
-                      flex: g.percent,
-                      child: Container(color: g.color),
-                    ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
