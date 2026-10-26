@@ -127,37 +127,6 @@ final List<BookModel> _allBooks = [
     description: 'Petualangan epik di negeri yang penuh misteri dan sihir.',
     isFavorite: true,
   ),
-  const BookModel(
-    title: 'Hujan',
-    author: 'Tere Liye',
-    genre: 'History',
-    coverTopColor: Color(0xFF4FB4D8),
-    coverBottomColor: Color(0xFFBEE6F2),
-    coverAsset: 'assets/covers/hujan.png',
-    progress: 0.24,
-    totalPages: 320,
-    currentPage: 77,
-    rating: 4.7,
-    description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu.',
-    subGenres: 'Fiksi Ilmiah, Distopia, Romance',
-    year: 2016,
-    format: 'Novella',
-    readers: 1240,
-    quotes: _hujanQuotes,
-  ),
-  const BookModel(
-    title: 'Aldebaran Bagian 1',
-    author: 'Tere Liye',
-    genre: 'Essays',
-    coverTopColor: Color(0xFF3F8F78),
-    coverBottomColor: Color(0xFF16402F),
-    coverAsset: 'assets/covers/aldebaran.png',
-    progress: 0.0,
-    totalPages: 400,
-    currentPage: 0,
-    rating: 4.5,
-    description: 'Bagian pertama dari seri Aldebaran yang memukau.',
-  ),
 ];
 
 // ─────────────────────── Library Screen ───────────────────────
@@ -675,8 +644,8 @@ class _SortChip extends StatelessWidget {
 void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
-      pageBuilder: (_, _, _) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, _, child) =>
+      pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
+          transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
@@ -727,7 +696,7 @@ class _CoverArt extends StatelessWidget {
             : Image.asset(
                 book.coverAsset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => fallback,
+                errorBuilder: (_, __, ___) => fallback,
               ),
       ),
     );
