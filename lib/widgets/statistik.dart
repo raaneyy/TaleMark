@@ -174,7 +174,7 @@ class _Brand extends StatelessWidget {
           child: Image.asset(
             'assets/images/logo_talemark.png',
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) =>
+            errorBuilder: (_, _, _) =>
                 const Icon(Icons.auto_stories_outlined, size: 20, color: _kInk),
           ),
         ),
@@ -543,7 +543,7 @@ class _FavBookTile extends StatelessWidget {
                   : Image.asset(
                       book.coverAsset!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => placeholder,
+                      errorBuilder: (_, _, _) => placeholder,
                     ),
             ),
           ),

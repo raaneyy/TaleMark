@@ -287,7 +287,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     : Image.asset(
                         book.coverAsset!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => fallback,
+                        errorBuilder: (_, _, _) => fallback,
                       ),
               ),
               Positioned(

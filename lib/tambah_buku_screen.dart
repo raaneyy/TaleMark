@@ -480,8 +480,9 @@ class _TambahBukuScreenState extends State<TambahBukuScreen> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(hintText: '2024'),
                     validator: (String? value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return null; // boleh kosong
+                      }
                       int? tahun = int.tryParse(value);
                       int tahunIni = DateTime.now().year;
                       if (tahun == null) return 'Harus berupa angka';

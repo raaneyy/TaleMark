@@ -250,7 +250,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 child: Image.asset(
                   'assets/images/logo_talemark.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.auto_stories_rounded,
                     size: 20,
                     color: _kInk,
@@ -675,8 +675,8 @@ class _SortChip extends StatelessWidget {
 void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
-      pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, __, child) =>
+      pageBuilder: (_, _, _) => BookDetailScreen(book: book),
+      transitionsBuilder: (_, animation, _, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
@@ -689,7 +689,7 @@ class _CoverArt extends StatelessWidget {
   final double radius;
   final double titleSize;
 
-  const _CoverArt({required this.book, this.radius = 12, this.titleSize = 20});
+  const _CoverArt({required this.book, this.titleSize = 20}) : radius = 12;
 
   @override
   Widget build(BuildContext context) {
@@ -727,7 +727,7 @@ class _CoverArt extends StatelessWidget {
             : Image.asset(
                 book.coverAsset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => fallback,
+                errorBuilder: (_, _, _) => fallback,
               ),
       ),
     );

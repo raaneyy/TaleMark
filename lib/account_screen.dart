@@ -63,11 +63,10 @@ class _FeedPost {
     required this.author,
     required this.text,
     this.rating = 0,
-    this.coverAsset,
     this.marginalia,
     this.likes = 0,
     this.comments = 0,
-  });
+  }) : coverAsset = null;
 }
 
 const List<_FeedPost> _posts = [
@@ -332,7 +331,7 @@ class _Avatar extends StatelessWidget {
               child: Image.asset(
                 'assets/images/avatar.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => fallback,
+                errorBuilder: (_, _, _) => fallback,
               ),
             ),
           ),
@@ -720,7 +719,7 @@ class _MiniCover extends StatelessWidget {
             : Image.asset(
                 asset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => placeholder,
+                errorBuilder: (_, _, _) => placeholder,
               ),
       ),
     );

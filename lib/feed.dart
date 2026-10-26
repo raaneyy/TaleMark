@@ -54,7 +54,10 @@ class FeedPage extends StatelessWidget {
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     Text('TERBARU',
                         style: TextStyle(
-                            color: _muted, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
+                            color: _muted,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2)),
                     Icon(Icons.keyboard_arrow_down, color: _muted),
                   ]),
                 ),
@@ -82,44 +85,56 @@ class FeedPage extends StatelessWidget {
 class _FeedHeader extends StatelessWidget {
   const _FeedHeader();
 
+  Widget _icon(IconData icon, VoidCallback onTap, {String? tooltip}) => IconButton(
+    onPressed: onTap,
+    tooltip: tooltip,
+    icon: Icon(icon, color: _muted, size: 26),
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 8, 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text('TaleMark',
-              style: TextStyle(fontFamily: _serif, fontSize: 28, fontWeight: FontWeight.w600)),
-          const SizedBox(width: 8),
-          const Padding(
-            padding: EdgeInsets.only(top: 6),
-            child: Text('· FEED',
-                style: TextStyle(color: _muted, fontSize: 13, letterSpacing: 1.5)),
+          const Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('TaleMark',
+                        style: TextStyle(
+                            fontFamily: _serif, fontSize: 28, fontWeight: FontWeight.w600)),
+                    SizedBox(width: 8),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Text('· FEED',
+                          style: TextStyle(color: _muted, fontSize: 13, letterSpacing: 1.5)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          const Spacer(),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search, color: _muted, size: 28)),
+          _icon(Icons.search, () {}),
           Stack(children: [
-            IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_none, color: _muted, size: 28)),
+            _icon(Icons.notifications_none, () {}),
             Positioned(
-              right: 12,
-              top: 10,
+              right: 9,
+              top: 8,
               child: Container(
                   width: 9,
                   height: 9,
                   decoration: const BoxDecoration(color: _ink, shape: BoxShape.circle)),
             ),
           ]),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.tune, color: _muted, size: 28)),
-          IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ProfilePage()),
-            ),
-            icon: const Icon(Icons.account_circle_outlined, color: _muted, size: 26),
-            tooltip: 'Profil',
-          ),
+          _icon(Icons.tune, () {}),
         ],
       ),
     );
@@ -182,15 +197,27 @@ class _DiscussionPostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        Text('Marcus Chen',
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                        Flexible(
+                          child: Text('Marcus Chen',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                        ),
                         SizedBox(width: 8),
-                        Text('•  @marcusread', style: TextStyle(color: _muted, fontSize: 15)),
+                        Flexible(
+                          child: Text('•  @marcusread',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: _muted, fontSize: 15)),
+                        ),
                       ]),
                       SizedBox(height: 2),
                       Text('KEMARIN',
                           style: TextStyle(
-                              color: _muted, fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w600)),
+                              color: _muted,
+                              fontSize: 13,
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -219,7 +246,7 @@ class _DiscussionPostCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             borderRadius: BorderRadius.circular(6)),
                         child: const Text('Edisi Cetak 1954',
                             style: TextStyle(color: _muted, fontSize: 13)),
@@ -293,16 +320,18 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             // top bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
               child: Row(
                 children: [
                   IconButton(
                       onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 22)),
+                      icon: const Icon(Icons.arrow_back_ios_new, size: 18)),
                   const Spacer(),
                   IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.share_outlined, color: _muted)),
-                  IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+                      onPressed: () {},
+                      icon: const Icon(Icons.share_outlined, color: _muted, size: 20)),
+                  IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.more_vert, size: 20)),
                 ],
               ),
             ),
@@ -315,18 +344,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      const _Avatar(size: 100, colors: [Color(0xFF4E342E), Color(0xFFA1887F)]),
+                      const _Avatar(size: 72, colors: [Color(0xFF4E342E), Color(0xFFA1887F)]),
                       Positioned(
                         right: -2,
                         bottom: -2,
                         child: Container(
-                          padding: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: _ink,
                             shape: BoxShape.circle,
                             border: Border.all(color: _bg, width: 2),
                           ),
-                          child: const Icon(Icons.verified, color: Colors.white, size: 18),
+                          child: const Icon(Icons.verified, color: Colors.white, size: 13),
                         ),
                       ),
                     ],
@@ -334,30 +363,32 @@ class _ProfilePageState extends State<ProfilePage> {
                   const Spacer(),
                   FilledButton.icon(
                     onPressed: () => setState(() => _following = !_following),
-                    icon: Icon(_following ? Icons.check : Icons.add),
+                    icon: Icon(_following ? Icons.check : Icons.add, size: 16),
                     label: Text(_following ? 'Mengikuti' : 'Ikuti'),
                     style: FilledButton.styleFrom(
                       backgroundColor: _following ? _chip : _ink,
                       foregroundColor: _following ? _ink : Colors.white,
-                      minimumSize: const Size(0, 46),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      minimumSize: const Size(0, 36),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    width: 46,
-                    height: 46,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                        color: _chip, borderRadius: BorderRadius.circular(14)),
+                        color: _chip, borderRadius: BorderRadius.circular(12)),
                     child: IconButton(
-                        onPressed: () {}, icon: const Icon(Icons.auto_stories_outlined)),
+                        padding: EdgeInsets.zero,
+                        onPressed: () {},
+                        icon: const Icon(Icons.auto_stories_outlined, size: 18)),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -365,28 +396,30 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Text('Julian Mahesa',
                       style: TextStyle(
-                          fontFamily: _serif, fontSize: 32, fontWeight: FontWeight.w600)),
+                          fontFamily: _serif, fontSize: 24, fontWeight: FontWeight.w600)),
                   SizedBox(height: 2),
-                  Text('@julianm', style: TextStyle(color: _muted, fontSize: 17)),
-                  SizedBox(height: 10),
+                  Text('@julianm', style: TextStyle(color: _muted, fontSize: 14)),
+                  SizedBox(height: 8),
                   Text(
                     'Menjelajahi fiksi spekulatif, arsitektur imajinasi, dan filsafat eksistensial. '
                     'Menulis catatan pinggir di malam hari.',
-                    style: TextStyle(fontSize: 18, height: 1.5),
+                    style: TextStyle(fontSize: 14, height: 1.5),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 18),
-            const _StatsCard(),
-            const SizedBox(height: 18),
-            const _TabChips(labels: ['Semua Feed', 'Catatan & Kutipan', 'Ulasan Buku']),
             const SizedBox(height: 14),
+            const _StatsCard(),
+            const SizedBox(height: 12),
+            const _TabChips(
+                compact: true, labels: ['Semua Feed', 'Catatan & Kutipan', 'Ulasan Buku']),
+            const SizedBox(height: 10),
             const _QuotePostCard(
               name: 'Julian Mahesa',
               handle: '@julianm',
               time: '2 JAM LALU',
               bigQuote: true,
+              linkToProfile: false, // sudah di halaman profil
               avatarColors: [Color(0xFF7CB342), Color(0xFF81D4FA)],
             ),
           ],
@@ -405,17 +438,17 @@ class _StatsCard extends StatelessWidget {
           child: Column(children: [
             Text(n,
                 style: const TextStyle(
-                    fontFamily: _serif, fontSize: 28, fontWeight: FontWeight.w500)),
+                    fontFamily: _serif, fontSize: 20, fontWeight: FontWeight.w500)),
             const SizedBox(height: 2),
-            Text(l, style: const TextStyle(color: _muted, fontSize: 15)),
+            Text(l, style: const TextStyle(color: _muted, fontSize: 12)),
           ]),
         );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(color: _chip, borderRadius: BorderRadius.circular(22)),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(color: _chip, borderRadius: BorderRadius.circular(16)),
         child: Row(children: [
           stat('42', 'Buku'),
           stat('185', 'Kutipan'),
@@ -435,6 +468,7 @@ class _QuotePostCard extends StatelessWidget {
   final String name, handle, time;
   final bool showReadingLabel;
   final bool bigQuote;
+  final bool linkToProfile;
   final List<Color> avatarColors;
 
   const _QuotePostCard({
@@ -444,6 +478,7 @@ class _QuotePostCard extends StatelessWidget {
     required this.avatarColors,
     this.showReadingLabel = false,
     this.bigQuote = false,
+    this.linkToProfile = true,
   });
 
   @override
@@ -456,39 +491,53 @@ class _QuotePostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // header
-            Row(
-              children: [
-                _Avatar(size: 48, colors: avatarColors),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        Flexible(
-                          child: Text(name,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontFamily: bigQuote ? _serif : null,
-                                  fontWeight: bigQuote ? FontWeight.w600 : FontWeight.w700,
-                                  fontSize: bigQuote ? 22 : 16)),
-                        ),
-                        const SizedBox(width: 8),
-                        Text('•  $handle',
-                            style: const TextStyle(color: _muted, fontSize: 15)),
-                      ]),
-                      const SizedBox(height: 2),
-                      Text(time,
-                          style: const TextStyle(
-                              color: _muted,
-                              fontSize: 13,
-                              letterSpacing: 1.2,
-                              fontWeight: FontWeight.w600)),
-                    ],
+            // header (avatar + nama → buka profil)
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: linkToProfile
+                  ? () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ProfilePage()),
+                      )
+                  : null,
+              child: Row(
+                children: [
+                  _Avatar(size: bigQuote ? 40 : 48, colors: avatarColors),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Flexible(
+                            child: Text(name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontFamily: bigQuote ? _serif : null,
+                                    fontWeight:
+                                        bigQuote ? FontWeight.w600 : FontWeight.w700,
+                                    fontSize: bigQuote ? 17 : 16)),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text('•  $handle',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: _muted, fontSize: 15)),
+                          ),
+                        ]),
+                        const SizedBox(height: 2),
+                        Text(time,
+                            style: const TextStyle(
+                                color: _muted,
+                                fontSize: 13,
+                                letterSpacing: 1.2,
+                                fontWeight: FontWeight.w600)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 12),
             _BookBox(showLabel: showReadingLabel, bigTitle: bigQuote),
@@ -502,8 +551,8 @@ class _QuotePostCard extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: _serif,
                   fontStyle: FontStyle.italic,
-                  fontSize: bigQuote ? 34 : 17,
-                  height: bigQuote ? 1.45 : 1.8,
+                  fontSize: bigQuote ? 22 : 17,
+                  height: bigQuote ? 1.5 : 1.8,
                 ),
               ),
             ),
@@ -560,18 +609,25 @@ class _BookBox extends StatelessWidget {
                         fontFamily: _serif, fontSize: 24, fontWeight: FontWeight.w600)),
                 const Text('Tere Liye', style: TextStyle(color: _muted, fontSize: 16)),
                 const SizedBox(height: 6),
-                Row(children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFE6E5E2), borderRadius: BorderRadius.circular(6)),
-                    child: const Text('Selesai Membaca',
-                        style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8)),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text('5.0', style: TextStyle(fontSize: 16)),
-                  const Icon(Icons.star, size: 18),
-                ]),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 6,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFE6E5E2),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: const Text('Selesai Membaca',
+                          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+                    ),
+                    const Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text('5.0', style: TextStyle(fontSize: 16)),
+                      Icon(Icons.star, size: 18),
+                    ]),
+                  ],
+                ),
               ],
             ),
           ),
@@ -608,38 +664,47 @@ class _PostActionsState extends State<_PostActions> {
     return Row(
       children: [
         InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           onTap: () => setState(() => _liked = !_liked),
           child: Padding(
             padding: const EdgeInsets.all(4),
             child: Row(children: [
               Icon(_liked ? Icons.favorite : Icons.favorite_border,
-                  color: _liked ? Colors.red : _ink, size: 28),
+                  color: _liked ? Colors.red : _ink, size: 26),
               const SizedBox(width: 6),
-              Text('$likes', style: const TextStyle(fontSize: 17, color: _muted)),
+              Text('$likes', style: const TextStyle(fontSize: 16, color: _muted)),
             ]),
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 12),
         Row(children: [
-          const Icon(Icons.mode_comment_outlined, size: 26),
+          const Icon(Icons.mode_comment_outlined, size: 24),
           const SizedBox(width: 6),
           Text(widget.commentLabel ?? '${widget.comments ?? 0}',
-              style: const TextStyle(fontSize: 17, color: _muted)),
+              style: const TextStyle(fontSize: 16, color: _muted)),
         ]),
-        const Spacer(),
-        InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => setState(() => _saved = !_saved),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(color: _chip, borderRadius: BorderRadius.circular(8)),
-            child: Row(children: [
-              Icon(_saved ? Icons.bookmark : Icons.bookmark_border, size: 20),
-              const SizedBox(width: 6),
-              Text(_saved ? 'Tersimpan' : '+ Simpan Kutipan',
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
-            ]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => setState(() => _saved = !_saved),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration:
+                      BoxDecoration(color: _chip, borderRadius: BorderRadius.circular(8)),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(_saved ? Icons.bookmark : Icons.bookmark_border, size: 20),
+                    const SizedBox(width: 6),
+                    Text(_saved ? 'Tersimpan' : '+ Simpan Kutipan',
+                        style: const TextStyle(fontWeight: FontWeight.w500)),
+                  ]),
+                ),
+              ),
+            ),
           ),
         ),
         if (widget.showShare) ...[
@@ -654,7 +719,8 @@ class _PostActionsState extends State<_PostActions> {
 class _TabChips extends StatefulWidget {
   final List<String> labels;
   final Widget? trailing;
-  const _TabChips({required this.labels, this.trailing});
+  final bool compact;
+  const _TabChips({required this.labels, this.trailing, this.compact = false});
 
   @override
   State<_TabChips> createState() => _TabChipsState();
@@ -666,7 +732,7 @@ class _TabChipsState extends State<_TabChips> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 50,
+      height: widget.compact ? 40 : 50,
       child: Row(
         children: [
           Expanded(
@@ -674,7 +740,7 @@ class _TabChipsState extends State<_TabChips> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: widget.labels.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (_, i) => ChoiceChip(
                 label: Text(widget.labels[i]),
                 selected: _sel == i,
@@ -684,9 +750,10 @@ class _TabChipsState extends State<_TabChips> {
                 backgroundColor: _chip,
                 side: BorderSide.none,
                 shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: EdgeInsets.symmetric(
+                    horizontal: widget.compact ? 10 : 14, vertical: widget.compact ? 4 : 10),
                 labelStyle: TextStyle(
-                    fontSize: 16,
+                    fontSize: widget.compact ? 13 : 16,
                     fontWeight: FontWeight.w500,
                     color: _sel == i ? Colors.white : _muted),
               ),
@@ -737,7 +804,14 @@ class _Pill extends StatelessWidget {
   final String label;
   final Color bg, fg;
   final bool bold;
-  const _Pill({required this.label, required this.bg, required this.fg, this.bold = false});
+  final double fontSize;
+  const _Pill({
+    required this.label,
+    required this.bg,
+    required this.fg,
+    this.bold = false,
+    this.fontSize = 14,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -746,7 +820,10 @@ class _Pill extends StatelessWidget {
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
       child: Text(label,
           style: TextStyle(
-              color: fg, fontWeight: bold ? FontWeight.w700 : FontWeight.w500, letterSpacing: 0.5)),
+              color: fg,
+              fontSize: fontSize,
+              fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+              letterSpacing: 0.5)),
     );
   }
 }
@@ -782,7 +859,7 @@ class _HujanCover extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  4. BOTTOM SHEET: BAGIKAN KUTIPAN
+//  4. BOTTOM SHEET: BAGIKAN KUTIPAN (ukuran diperkecil)
 // ═══════════════════════════════════════════════════════════════
 
 Future<void> showShareQuoteSheet(BuildContext context) {
@@ -793,7 +870,7 @@ Future<void> showShareQuoteSheet(BuildContext context) {
     backgroundColor: _bg,
     showDragHandle: false,
     shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
     builder: (_) => const ShareQuoteSheet(),
   );
 }
@@ -834,13 +911,18 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
       builder: (ctx) => AlertDialog(
         title: const Text('Tambah Mood'),
         content: TextField(
-            controller: c, autofocus: true, decoration: const InputDecoration(hintText: 'mis. Senja')),
+            controller: c,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'mis. Senja')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: const Text('Tambah')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, c.text.trim()),
+              child: const Text('Tambah')),
         ],
       ),
     );
+    c.dispose();
     if (result != null && result.isNotEmpty) {
       setState(() => _tags.add(_Tag('Suasana: $result', mood: true)));
     }
@@ -856,29 +938,29 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
         children: [
           // drag handle
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: 8),
             child: Container(
-              width: 48,
-              height: 5,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                   color: const Color(0xFFD0CFCB), borderRadius: BorderRadius.circular(3)),
             ),
           ),
           // title
           SizedBox(
-            height: 64,
+            height: 48,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close)),
+                      icon: const Icon(Icons.close, size: 22)),
                 ),
                 const Text('Bagikan Kutipan',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -886,7 +968,7 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
           // body
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -898,42 +980,57 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                         decoration: const BoxDecoration(
                             shape: BoxShape.circle, color: Color(0xFFE0A23B)),
                         child: const _Avatar(
-                            size: 62,
+                            size: 46,
                             initials: 'JM',
                             colors: [Color(0xFF2B2623), Color(0xFF2B2623)]),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Row(children: [
-                              Text('Julian Mahesa',
-                                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-                              SizedBox(width: 8),
-                              Text('@julianm', style: TextStyle(color: _muted)),
+                              Flexible(
+                                child: Text('Julian Mahesa',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w700, fontSize: 15)),
+                              ),
+                              SizedBox(width: 6),
+                              Flexible(
+                                child: Text('@julianm',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(color: _muted, fontSize: 13)),
+                              ),
                             ]),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 4),
                             Container(
-                              padding: const EdgeInsets.only(left: 12, right: 4),
+                              padding: const EdgeInsets.only(left: 10, right: 2),
                               decoration: BoxDecoration(
                                 color: _chip,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(color: const Color(0xFFE0DFDB)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(_public ? Icons.public : Icons.lock_outline, size: 18),
-                                  const SizedBox(width: 8),
+                                  Icon(_public ? Icons.public : Icons.lock_outline,
+                                      size: 15),
+                                  const SizedBox(width: 6),
                                   Text(_public ? 'Publik' : 'Privat',
-                                      style: const TextStyle(fontSize: 16)),
-                                  Switch(
-                                    value: _public,
-                                    onChanged: (v) => setState(() => _public = v),
-                                    activeColor: Colors.white,
-                                    activeTrackColor: _ink,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      style: const TextStyle(fontSize: 13)),
+                                  Transform.scale(
+                                    scale: 0.75,
+                                    child: Switch(
+                                      value: _public,
+                                      onChanged: (v) => setState(() => _public = v),
+                                      activeThumbColor: Colors.white,
+                                      activeTrackColor: _ink,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -943,50 +1040,50 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   // toolbar B I U
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           color: _chip,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: const Color(0xFFE0DFDB)),
                         ),
                         child: Row(children: [
                           _FmtButton(
+                              active: _bold,
+                              onTap: () => setState(() => _bold = !_bold),
                               child: const Text('B',
                                   style: TextStyle(
                                       fontFamily: _serif,
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 20)),
-                              active: _bold,
-                              onTap: () => setState(() => _bold = !_bold)),
+                                      fontSize: 16))),
                           _FmtButton(
+                              active: _italic,
+                              onTap: () => setState(() => _italic = !_italic),
                               child: const Text('I',
                                   style: TextStyle(
                                       fontFamily: _serif,
                                       fontStyle: FontStyle.italic,
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 20)),
-                              active: _italic,
-                              onTap: () => setState(() => _italic = !_italic)),
+                                      fontSize: 16))),
                           _FmtButton(
+                              active: _underline,
+                              onTap: () => setState(() => _underline = !_underline),
                               child: const Text('U',
                                   style: TextStyle(
                                       fontFamily: _serif,
                                       decoration: TextDecoration.underline,
-                                      fontSize: 20)),
-                              active: _underline,
-                              onTap: () => setState(() => _underline = !_underline)),
+                                      fontSize: 16))),
                         ]),
                       ),
                       const Spacer(),
-                      const Icon(Icons.format_quote, color: _muted, size: 30),
+                      const Icon(Icons.format_quote, color: _muted, size: 24),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   // editor
                   TextField(
                     controller: _ctrl,
@@ -994,11 +1091,12 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                     cursorColor: _accent,
                     style: TextStyle(
                       fontFamily: _serif,
-                      fontSize: 30,
+                      fontSize: 20,
                       height: 1.5,
                       fontWeight: _bold ? FontWeight.w700 : FontWeight.w400,
                       fontStyle: _italic ? FontStyle.italic : FontStyle.normal,
-                      decoration: _underline ? TextDecoration.underline : TextDecoration.none,
+                      decoration:
+                          _underline ? TextDecoration.underline : TextDecoration.none,
                     ),
                     decoration: const InputDecoration(
                       isDense: true,
@@ -1007,69 +1105,77 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                       hintText: 'Tulis kutipan…',
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
                   // related book
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFE0DFDB)),
                     ),
                     child: Row(
                       children: [
-                        const _HujanCover(width: 56, height: 84),
-                        const SizedBox(width: 14),
+                        const _HujanCover(width: 42, height: 63),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(children: [
-                                _Pill(
-                                    label: 'BUKU TERKAIT',
-                                    bg: _accentBg,
-                                    fg: _accent,
-                                    bold: true),
-                                const SizedBox(width: 10),
-                                const Text('Hal. 42', style: TextStyle(color: _muted)),
-                              ]),
-                              const SizedBox(height: 6),
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: [
+                                  _Pill(
+                                      label: 'BUKU TERKAIT',
+                                      bg: _accentBg,
+                                      fg: _accent,
+                                      bold: true,
+                                      fontSize: 11),
+                                  const Text('Hal. 42',
+                                      style: TextStyle(color: _muted, fontSize: 13)),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
                               const Text('Hujan',
-                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                                  style: TextStyle(
+                                      fontSize: 16, fontWeight: FontWeight.w600)),
                               const Text('Tere Liye  •  2016',
-                                  style: TextStyle(color: _muted, fontSize: 16)),
+                                  style: TextStyle(color: _muted, fontSize: 13)),
                             ],
                           ),
                         ),
                         IconButton(
                             onPressed: () {},
-                            icon: const Icon(Icons.edit_outlined, color: _muted)),
+                            icon: const Icon(Icons.edit_outlined, color: _muted, size: 20)),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   // tags
                   Wrap(
-                    spacing: 10,
-                    runSpacing: 8,
+                    spacing: 8,
+                    runSpacing: 6,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       for (final t in _tags)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                           decoration: BoxDecoration(
                             color: t.mood ? _accentBg : _chip,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
                             Text(t.mood ? '☕ ${t.label}' : '🏷️ ${t.label}',
                                 style: TextStyle(
-                                    fontSize: 16, color: t.mood ? _accent : _ink)),
+                                    fontSize: 13, color: t.mood ? _accent : _ink)),
                             const SizedBox(width: 6),
                             GestureDetector(
                               onTap: () => setState(() => _tags.remove(t)),
                               child: Icon(Icons.close,
-                                  size: 16, color: t.mood ? _accent : _muted),
+                                  size: 14, color: t.mood ? _accent : _muted),
                             ),
                           ]),
                         ),
@@ -1077,7 +1183,7 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                         onPressed: _addMood,
                         style: TextButton.styleFrom(foregroundColor: _accent),
                         child: const Text('+ Tambah Mood',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                       ),
                     ],
                   ),
@@ -1089,10 +1195,10 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
           Container(
             decoration: const BoxDecoration(
                 border: Border(top: BorderSide(color: Color(0xFFE6E5E2)))),
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
             child: SizedBox(
               width: double.infinity,
-              height: 58,
+              height: 48,
               child: FilledButton(
                 onPressed: () {
                   // TODO: kirim _ctrl.text, _public, dan _tags ke backend
@@ -1100,15 +1206,15 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: _ink,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Kirim Kutipan',
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),
-                    SizedBox(width: 10),
-                    Icon(Icons.arrow_forward),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward, size: 20),
                   ],
                 ),
               ),
@@ -1132,8 +1238,8 @@ class _FmtButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
       child: Container(
-        width: 52,
-        height: 40,
+        width: 40,
+        height: 32,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? Colors.white : Colors.transparent,

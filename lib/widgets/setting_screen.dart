@@ -246,8 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildThemeBlock(),
                 _SettingRow(
                   icon: Icons.translate_rounded,
-                  title: 'Bahasa Aplikasi',
-                  subtitle: 'Teks antarmuka & metadata buku',
+                  title: 'Bahasa',
                   trailing: _LanguagePill(label: _language),
                   showChevron: true,
                   onTap: _pickLanguage,
@@ -616,23 +615,23 @@ class _LanguagePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 110),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: _kInset,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontFamily: _kSans,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-            height: 1.2,
-            color: _kInk,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: _kInset,                       // warna latar box
+        borderRadius: BorderRadius.circular(8), // lengkung sudut
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontFamily: _kSans,
+          fontSize: 13,                       // ukuran teks
+          fontWeight: FontWeight.w500,
+          height: 1.2,
+          color: _kInk,
         ),
       ),
     );
@@ -762,7 +761,7 @@ class _Avatar extends StatelessWidget {
               child: Image.asset(
                 'assets/images/avatar.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => fallback,
+                errorBuilder: (_, _, _) => fallback,
               ),
             ),
           ),
