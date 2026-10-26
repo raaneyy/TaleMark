@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'library_screen.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
@@ -18,48 +19,49 @@ const _kStatusLabels = ['Want to Read', 'Reading', 'Finished'];
 /// Hanya untuk preview layar ini secara terpisah.
 /// Aplikasi sebenarnya tetap dijalankan dari main.dart.
 void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: BookDetailScreen(
-      book: BookModel(
-        title: 'Hujan',
-        author: 'Tere Liye',
-        genre: 'Fiction',
-        subGenres: 'Fiksi Ilmiah, Distopia, Romance',
-        year: 2016,
-        format: 'Novella',
-        readers: 1240,
-        coverTopColor: const Color(0xFF4FB4D8),
-        coverBottomColor: const Color(0xFFBEE6F2),
-        coverAsset: 'assets/covers/hujan.png',
-        progress: 0.24,
-        totalPages: 320,
-        currentPage: 77,
-        rating: 4.6,
-        description:
-            'Novel tentang persahabatan, harapan, dan kenangan masa lalu. Lail berusaha mengatasi trauma masa lalu dan kerinduan mendalam pada sahabatnya, Esok. Di tengah dunia yang terus berubah, ia belajar menerima apa yang telah hilang.',
-        quotes: const [
-          BookQuote(
-            label: 'ENDING',
-            text: 'Contoh kutipan pertama. Ganti dengan kutipan favoritmu.',
-          ),
-        ],
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: BookDetailScreen(
+        book: BookModel(
+          title: 'Hujan',
+          author: 'Tere Liye',
+          genre: 'Fiction',
+          subGenres: 'Fiksi Ilmiah, Distopia, Romance',
+          year: 2016,
+          format: 'Novella',
+          readers: 1240,
+          coverTopColor: const Color(0xFF4FB4D8),
+          coverBottomColor: const Color(0xFFBEE6F2),
+          coverAsset: 'assets/covers/hujan.png',
+          progress: 0.24,
+          totalPages: 320,
+          currentPage: 77,
+          rating: 4.6,
+          description: 'Novel tentang persahabatan, harapan, dan kenangan masa lalu. Lail berusaha mengatasi trauma masa lalu dan kerinduan mendalam pada sahabatnya, Esok. Di tengah dunia yang terus berubah, ia belajar menerima apa yang telah hilang.',
+          quotes: const [
+            BookQuote(
+              label: 'ENDING',
+              text: 'Contoh kutipan pertama. Ganti dengan kutipan favoritmu.',
+            ),
+          ],
+        ),
       ),
     ),
-  ));
+  );
 }
 
 BoxDecoration _cardDecoration() => BoxDecoration(
-      color: _kCard,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha(10),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
+  color: _kCard,
+  borderRadius: BorderRadius.circular(16),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withAlpha(10),
+      blurRadius: 12,
+      offset: const Offset(0, 2),
+    ),
+  ],
+);
 
 // ─────────────────────── Book Detail Screen ───────────────────────
 class BookDetailScreen extends StatefulWidget {
@@ -101,9 +103,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   }
 
   // ── Helper hitung ──
-  int get _percent => book.totalPages == 0
-      ? 0
-      : (_currentPage / book.totalPages * 100).round();
+  int get _percent =>
+      book.totalPages == 0 ? 0 : (_currentPage / book.totalPages * 100).round();
 
   double get _progressValue => book.totalPages == 0
       ? 0.0
@@ -125,9 +126,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   }
 
   String _fmtNumber(int n) => n.toString().replaceAllMapped(
-        RegExp(r'\B(?=(\d{3})+(?!\d))'),
-        (m) => ',',
-      );
+    RegExp(r'\B(?=(\d{3})+(?!\d))'),
+    (m) => ',',
+  );
 
   // ── Aksi ──
   void _saveProgress() {
@@ -152,13 +153,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text(
           'New Quote',
-          style: TextStyle(fontFamily: _kSerif, fontSize: 22),
+          style: TextStyle(fontFamily: _kSerif, fontSize: 19),
         ),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           minLines: 3,
           maxLines: 6,
+          style: const TextStyle(fontSize: 14),
           decoration: const InputDecoration(
             hintText: 'Tulis kutipan dari buku ini...',
           ),
@@ -175,8 +177,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         ],
       ),
     );
+    ctrl.dispose();
     if (text == null || text.isEmpty || !mounted) return;
-    setState(() => _quotes.add(BookQuote(label: 'PAGE $_currentPage', text: text)));
+    setState(
+      () => _quotes.add(BookQuote(label: 'PAGE $_currentPage', text: text)),
+    );
   }
 
   void _snack(String message) {
@@ -197,25 +202,25 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildTopBar(),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               _buildCover(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 22),
               _buildTitleBlock(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildRatingPill(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildStatusTabs(),
               if (_status == 1) ...[
                 const SizedBox(height: 12),
                 _buildProgressCard(),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildOverview(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildVerdict(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
               _buildMarginaliaHeader(),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               ..._buildQuoteCards(),
             ],
           ),
@@ -230,7 +235,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       alignment: Alignment.centerLeft,
       child: IconButton(
         onPressed: () => Navigator.of(context).maybePop(),
-        icon: const Icon(Icons.arrow_back_rounded, color: _kInk, size: 24),
+        icon: const Icon(Icons.arrow_back_rounded, color: _kInk, size: 22),
       ),
     );
   }
@@ -253,7 +258,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.5,
               height: 1.1,
@@ -265,8 +270,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
     return Center(
       child: Container(
-        width: 160,
-        height: 240,
+        width: 150,
+        height: 225,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
           boxShadow: [
@@ -294,8 +299,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 left: 8,
                 bottom: 8,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF6B6B6B).withAlpha(210),
                     borderRadius: BorderRadius.circular(3),
@@ -305,9 +312,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     style: const TextStyle(
                       fontFamily: _kSans,
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
+                      letterSpacing: 1.1,
                     ),
                   ),
                 ),
@@ -328,9 +335,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: _kSans,
-            fontSize: 12,
+            fontSize: 10.5,
             fontWeight: FontWeight.w500,
-            letterSpacing: 1.0,
+            letterSpacing: 0.9,
             color: _kBody,
           ),
         ),
@@ -340,24 +347,24 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: _kSerif,
-            fontSize: 40,
+            fontSize: 30,
             fontWeight: FontWeight.w500,
             color: _kInk,
             height: 1.1,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           book.author,
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: _kSerif,
-            fontSize: 20,
+            fontSize: 16,
             fontStyle: FontStyle.italic,
             color: Color(0xFF6B6B6B),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         _buildMeta(),
       ],
     );
@@ -374,21 +381,19 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     final spans = <InlineSpan>[];
     for (int i = 0; i < parts.length; i++) {
       if (i > 0) {
-        spans.add(const TextSpan(
-          text: '  •  ',
-          style: TextStyle(color: Color(0xFFC8C8C4)),
-        ));
+        spans.add(
+          const TextSpan(
+            text: '  •  ',
+            style: TextStyle(color: Color(0xFFC8C8C4)),
+          ),
+        );
       }
       spans.add(TextSpan(text: parts[i]));
     }
 
     return Text.rich(
       TextSpan(
-        style: const TextStyle(
-          fontFamily: _kSans,
-          fontSize: 14,
-          color: _kBody,
-        ),
+        style: const TextStyle(fontFamily: _kSans, fontSize: 12, color: _kBody),
         children: spans,
       ),
       textAlign: TextAlign.center,
@@ -399,10 +404,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   Widget _buildRatingPill() {
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: _kTrack,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withAlpha(10),
@@ -415,28 +420,28 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _stars(book.rating),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Text(
               book.rating.toStringAsFixed(1),
               style: const TextStyle(
                 fontFamily: _kSans,
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: _kInk,
               ),
             ),
             if (book.readers != null) ...[
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               const Text(
                 '/',
-                style: TextStyle(fontSize: 15, color: Color(0xFFC8C8C4)),
+                style: TextStyle(fontSize: 13, color: Color(0xFFC8C8C4)),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 '${_fmtNumber(book.readers!)} readers',
                 style: const TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 14,
+                  fontSize: 12,
                   color: _kMuted,
                 ),
               ),
@@ -447,7 +452,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     );
   }
 
-  Widget _stars(double rating, {double size = 18}) {
+  Widget _stars(double rating, {double size = 15}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (i) {
@@ -455,8 +460,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         final icon = v >= 0.75
             ? Icons.star_rounded
             : v >= 0.25
-                ? Icons.star_half_rounded
-                : Icons.star_border_rounded;
+            ? Icons.star_half_rounded
+            : Icons.star_border_rounded;
         return Icon(icon, size: size, color: _kInk);
       }),
     );
@@ -479,7 +484,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 onTap: () => setState(() => _status = i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: _status == i ? _kInk : Colors.transparent,
@@ -490,23 +495,28 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     children: [
                       if (_status == i && i == 1) ...[
                         Container(
-                          width: 7,
-                          height: 7,
+                          width: 6,
+                          height: 6,
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                       ],
-                      Text(
-                        _kStatusLabels[i],
-                        style: TextStyle(
-                          fontFamily: _kSans,
-                          fontSize: 14,
-                          fontWeight:
-                              _status == i ? FontWeight.w600 : FontWeight.w500,
-                          color: _status == i ? Colors.white : _kBody,
+                      Flexible(
+                        child: Text(
+                          _kStatusLabels[i],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: _kSans,
+                            fontSize: 12.5,
+                            fontWeight: _status == i
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color: _status == i ? Colors.white : _kBody,
+                          ),
                         ),
                       ),
                     ],
@@ -535,9 +545,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   'CURRENT SESSION PROGRESS',
                   style: TextStyle(
                     fontFamily: _kSans,
-                    fontSize: 12,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8,
+                    letterSpacing: 0.7,
                     color: _kBody,
                   ),
                 ),
@@ -547,7 +557,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 'p. $_currentPage of ${book.totalPages} ($_percent%)',
                 style: const TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 13,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   color: _kInk,
                 ),
@@ -559,24 +569,24 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: _progressValue,
-              minHeight: 6,
+              minHeight: 5,
               backgroundColor: _kTrack,
               valueColor: const AlwaysStoppedAnimation<Color>(_kInk),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             'Estimated time left: $_timeLeft',
             style: const TextStyle(
               fontFamily: _kSans,
-              fontSize: 13,
+              fontSize: 11.5,
               color: _kMuted,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: _kInset,
               borderRadius: BorderRadius.circular(12),
@@ -587,18 +597,18 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   'LAST PAGE',
                   style: TextStyle(
                     fontFamily: _kSans,
-                    fontSize: 12,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 1.0,
+                    letterSpacing: 0.9,
                     color: _kBody,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      width: 76,
+                      width: 62,
                       child: TextField(
                         controller: _pageCtrl,
                         keyboardType: TextInputType.number,
@@ -608,7 +618,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         ],
                         style: const TextStyle(
                           fontFamily: _kSerif,
-                          fontSize: 34,
+                          fontSize: 26,
                           fontWeight: FontWeight.w500,
                           color: _kInk,
                         ),
@@ -623,7 +633,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       '/${book.totalPages}',
                       style: const TextStyle(
                         fontFamily: _kSerif,
-                        fontSize: 34,
+                        fontSize: 26,
                         fontWeight: FontWeight.w400,
                         color: _kBody,
                       ),
@@ -633,17 +643,17 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 52,
+            height: 46,
             child: ElevatedButton.icon(
               onPressed: _saveProgress,
-              icon: const Icon(Icons.bookmark_added_outlined, size: 20),
+              icon: const Icon(Icons.bookmark_added_outlined, size: 18),
               label: const Text(
                 'Save reading progress',
                 style: TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -665,7 +675,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   // ── Overview ──
   Widget _buildOverview() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,12 +684,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             'Overview',
             style: TextStyle(
               fontFamily: _kSerif,
-              fontSize: 24,
+              fontSize: 19,
               fontWeight: FontWeight.w500,
               color: _kInk,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.topCenter,
@@ -689,13 +699,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               overflow: _expanded ? TextOverflow.visible : TextOverflow.fade,
               style: const TextStyle(
                 fontFamily: _kSans,
-                fontSize: 16,
+                fontSize: 13.5,
                 height: 1.6,
                 color: _kBody,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
             behavior: HitTestBehavior.opaque,
@@ -706,7 +716,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   _expanded ? 'Read less' : 'Read more',
                   style: const TextStyle(
                     fontFamily: _kSans,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w500,
                     color: _kInk,
                   ),
@@ -716,7 +726,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   _expanded
                       ? Icons.keyboard_arrow_up_rounded
                       : Icons.keyboard_arrow_down_rounded,
-                  size: 18,
+                  size: 16,
                   color: _kInk,
                 ),
               ],
@@ -730,7 +740,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   // ── Penilaian pribadi ──
   Widget _buildVerdict() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -739,9 +749,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             'PRIVATE LEDGER',
             style: TextStyle(
               fontFamily: _kSans,
-              fontSize: 12,
+              fontSize: 10.5,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.8,
+              letterSpacing: 0.7,
               color: _kBody,
             ),
           ),
@@ -750,14 +760,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             'Your Critical Verdict',
             style: TextStyle(
               fontFamily: _kSerif,
-              fontSize: 24,
+              fontSize: 19,
               fontWeight: FontWeight.w500,
               color: _kInk,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
               color: _kInset,
               borderRadius: BorderRadius.circular(12),
@@ -768,7 +778,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   'Score',
                   style: TextStyle(
                     fontFamily: _kSans,
-                    fontSize: 15,
+                    fontSize: 13,
                     color: _kBody,
                   ),
                 ),
@@ -778,12 +788,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     onTap: () =>
                         setState(() => _myScore = _myScore == i ? 0 : i),
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 14),
+                      padding: const EdgeInsets.only(left: 10),
                       child: Icon(
                         i <= _myScore
                             ? Icons.star_rounded
                             : Icons.star_border_rounded,
-                        size: 28,
+                        size: 24,
                         color: _kInk,
                       ),
                     ),
@@ -808,7 +818,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   text: 'Marginalia & Excerpts',
                   style: TextStyle(
                     fontFamily: _kSerif,
-                    fontSize: 24,
+                    fontSize: 19,
                     fontWeight: FontWeight.w500,
                     color: _kInk,
                   ),
@@ -817,7 +827,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   text: '   (${_quotes.length} Saved)',
                   style: const TextStyle(
                     fontFamily: _kSans,
-                    fontSize: 13,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                     color: _kMuted,
                   ),
@@ -828,12 +838,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         ),
         TextButton.icon(
           onPressed: _addQuote,
-          icon: const Icon(Icons.add_rounded, size: 20),
+          icon: const Icon(Icons.add_rounded, size: 18),
           label: const Text(
             'New Quote',
             style: TextStyle(
               fontFamily: _kSans,
-              fontSize: 14,
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -850,14 +860,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     if (_quotes.isEmpty) {
       return [
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           decoration: _cardDecoration(),
           child: const Center(
             child: Text(
               'Belum ada kutipan tersimpan.',
               style: TextStyle(
                 fontFamily: _kSans,
-                fontSize: 14,
+                fontSize: 12.5,
                 color: _kMuted,
               ),
             ),
@@ -889,7 +899,7 @@ class _QuoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -900,39 +910,42 @@ class _QuoteCard extends StatelessWidget {
                 quote.label.toUpperCase(),
                 style: const TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 12,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.8,
+                  letterSpacing: 0.7,
                   color: _kBody,
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.bookmark_added_outlined,
-                  size: 22, color: _kBody),
+              const Icon(
+                Icons.bookmark_added_outlined,
+                size: 20,
+                color: _kBody,
+              ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Text(
             '\u201C${quote.text}\u201D',
             style: const TextStyle(
               fontFamily: _kSerif,
-              fontSize: 22,
+              fontSize: 17,
               fontStyle: FontStyle.italic,
               height: 1.5,
               color: _kInk,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: onPost,
-              icon: const Icon(Icons.ios_share_rounded, size: 18),
+              icon: const Icon(Icons.ios_share_rounded, size: 16),
               label: const Text(
                 'Post',
                 style: TextStyle(
                   fontFamily: _kSans,
-                  fontSize: 14,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -13,8 +13,18 @@ const _kInset = Color(0xFFF4F4F2);
 const _kDivider = Color(0xFFF0F0EE);
 const _kSwitchOff = Color(0xFFE0E0DE);
 const _kDanger = Color(0xFFC62828);
+const _kWarn = Color(0xFFEF6C00);
+const _kOk = Color(0xFF2D7D32);
 const _kSerif = 'Newsreader';
 const _kSans = 'Inter';
+
+/// Callback untuk mengganti kata sandi ke server / Firebase / API.
+/// Kembalikan `null` jika BERHASIL, atau teks pesan error jika GAGAL
+/// (contoh: 'Kata sandi saat ini salah').
+typedef ChangePasswordCallback = Future<String?> Function(
+  String currentPassword,
+  String newPassword,
+);
 
 /// Hanya untuk preview layar ini secara terpisah.
 /// Aplikasi sebenarnya tetap dijalankan dari main.dart.
@@ -82,7 +92,11 @@ class SettingsScreen extends StatefulWidget {
   /// Dipanggil setelah pengguna mengonfirmasi keluar dari akun.
   final VoidCallback? onLogout;
 
-  const SettingsScreen({super.key, this.onLogout});
+  /// Dipanggil saat pengguna menyimpan kata sandi baru.
+  /// Jika null, layar ini hanya menjalankan simulasi (demo).
+  final ChangePasswordCallback? onChangePassword;
+
+  const SettingsScreen({super.key, this.onLogout, this.onChangePassword});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -93,6 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _themeSwitch = false;
   bool _notifOn = true;
   String _language = _languages.first;
+  String _passwordSubtitle = 'Terakhir diubah 3 bulan lalu';
 
   void _snack(String message) {
     ScaffoldMessenger.of(context)
@@ -101,6 +116,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _soon() => _snack('Fitur ini segera hadir');
+
+  Future<void> _changePassword() async {
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => _ChangePasswordSheet(onSubmit: widget.onChangePassword),
+    );
+    if (ok == true && mounted) {
+      setState(() => _passwordSubtitle = 'Terakhir diubah baru saja');
+      _snack('Kata sandi berhasil diubah');
+    }
+  }
 
   Future<void> _pickLanguage() async {
     final picked = await showModalBottomSheet<String>(
@@ -261,9 +293,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _SettingRow(
                   icon: Icons.lock_outline_rounded,
                   title: 'Ganti Kata Sandi',
-                  subtitle: 'Terakhir diubah 3 bulan lalu',
+                  subtitle: _passwordSubtitle,
                   showChevron: true,
-                  onTap: _soon,
+                  onTap: _changePassword,
                 ),
               ],
             ),
@@ -488,6 +520,390 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
+// ─────────────────────── Sheet Ganti Kata Sandi ───────────────────────
+class _ChangePasswordSheet extends StatefulWidget {
+  final ChangePasswordCallback? onSubmit;
+
+  const _ChangePasswordSheet({this.onSubmit});
+
+  @override
+  State<_ChangePasswordSheet> createState() => _ChangePasswordSheetState();
+}
+
+class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _currentC = TextEditingController();
+  final _newC = TextEditingController();
+  final _confirmC = TextEditingController();
+
+  bool _showCurrent = false;
+  bool _showNew = false;
+  bool _showConfirm = false;
+  bool _loading = false;
+  String? _serverError;
+
+  @override
+  void dispose() {
+    _currentC.dispose();
+    _newC.dispose();
+    _confirmC.dispose();
+    super.dispose();
+  }
+
+  // Kekuatan kata sandi: 1 = lemah, 2 = sedang, 3 = kuat
+  int _strength(String p) {
+    int score = 0;
+    if (p.length >= 8) score++;
+    if (RegExp(r'[A-Z]').hasMatch(p) && RegExp(r'[a-z]').hasMatch(p)) score++;
+    if (RegExp(r'\d').hasMatch(p) && RegExp(r'[^A-Za-z0-9]').hasMatch(p)) {
+      score++;
+    }
+    return score < 1 ? 1 : score;
+  }
+
+  String? _validateCurrent(String? v) {
+    if (v == null || v.isEmpty) return 'Masukkan kata sandi saat ini';
+    return null;
+  }
+
+  String? _validateNew(String? v) {
+    if (v == null || v.isEmpty) return 'Masukkan kata sandi baru';
+    if (v.length < 8) return 'Minimal 8 karakter';
+    if (!RegExp(r'[A-Za-z]').hasMatch(v) || !RegExp(r'\d').hasMatch(v)) {
+      return 'Harus mengandung huruf dan angka';
+    }
+    if (v == _currentC.text) return 'Tidak boleh sama dengan kata sandi lama';
+    return null;
+  }
+
+  String? _validateConfirm(String? v) {
+    if (v == null || v.isEmpty) return 'Ulangi kata sandi baru';
+    if (v != _newC.text) return 'Konfirmasi kata sandi tidak cocok';
+    return null;
+  }
+
+  Future<void> _submit() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _serverError = null);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _loading = true);
+    String? error;
+    try {
+      final cb = widget.onSubmit;
+      if (cb != null) {
+        error = await cb(_currentC.text, _newC.text);
+      } else {
+        // Mode demo: simulasi proses ke server
+        await Future.delayed(const Duration(milliseconds: 800));
+      }
+    } catch (_) {
+      error = 'Terjadi kesalahan. Coba lagi.';
+    }
+
+    if (!mounted) return;
+    if (error == null) {
+      Navigator.pop(context, true);
+    } else {
+      setState(() {
+        _loading = false;
+        _serverError = error;
+      });
+    }
+  }
+
+  OutlineInputBorder _border(Color color, [double width = 1]) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color, width: width),
+    );
+  }
+
+  Widget _field({
+    required String label,
+    required TextEditingController controller,
+    required bool visible,
+    required VoidCallback onToggle,
+    required String? Function(String?) validator,
+    TextInputAction action = TextInputAction.next,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: !visible,
+      enabled: !_loading,
+      validator: validator,
+      onChanged: onChanged,
+      onFieldSubmitted: onSubmitted,
+      textInputAction: action,
+      autocorrect: false,
+      enableSuggestions: false,
+      style: const TextStyle(fontFamily: _kSans, fontSize: 15, color: _kInk),
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: _kInset,
+        labelStyle: const TextStyle(
+          fontFamily: _kSans,
+          fontSize: 14,
+          color: _kMuted,
+        ),
+        floatingLabelStyle: const TextStyle(
+          fontFamily: _kSans,
+          fontSize: 14,
+          color: _kInk,
+        ),
+        errorStyle: const TextStyle(
+          fontFamily: _kSans,
+          fontSize: 12,
+          color: _kDanger,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: _border(Colors.transparent),
+        enabledBorder: _border(Colors.transparent),
+        disabledBorder: _border(Colors.transparent),
+        focusedBorder: _border(_kInk, 1.2),
+        errorBorder: _border(_kDanger),
+        focusedErrorBorder: _border(_kDanger, 1.2),
+        suffixIcon: IconButton(
+          onPressed: onToggle,
+          icon: Icon(
+            visible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            size: 20,
+            color: _kMuted,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStrength() {
+    if (_newC.text.isEmpty) return const SizedBox.shrink();
+
+    final s = _strength(_newC.text);
+    final colors = [_kDanger, _kWarn, _kOk];
+    final labels = ['Lemah', 'Sedang', 'Kuat'];
+    final color = colors[s - 1];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                for (int i = 0; i < 3; i++)
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      margin: EdgeInsets.only(right: i < 2 ? 4 : 0),
+                      decoration: BoxDecoration(
+                        color: i < s ? color : _kSwitchOff,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            labels[s - 1],
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(22, 12, 22, 24 + bottomInset),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _kSwitchOff,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            // Judul
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Ganti Kata Sandi',
+                    style: TextStyle(
+                      fontFamily: _kSerif,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w500,
+                      color: _kInk,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _loading ? null : () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded, size: 22, color: _kBody),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Gunakan minimal 8 karakter dengan kombinasi huruf dan angka.',
+              style: TextStyle(
+                fontFamily: _kSans,
+                fontSize: 14,
+                height: 1.4,
+                color: _kSub,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Kata sandi saat ini
+            _field(
+              label: 'Kata sandi saat ini',
+              controller: _currentC,
+              visible: _showCurrent,
+              onToggle: () => setState(() => _showCurrent = !_showCurrent),
+              validator: _validateCurrent,
+            ),
+            const SizedBox(height: 14),
+
+            // Kata sandi baru
+            _field(
+              label: 'Kata sandi baru',
+              controller: _newC,
+              visible: _showNew,
+              onToggle: () => setState(() => _showNew = !_showNew),
+              validator: _validateNew,
+              onChanged: (_) => setState(() {}),
+            ),
+            _buildStrength(),
+            const SizedBox(height: 14),
+
+            // Konfirmasi
+            _field(
+              label: 'Konfirmasi kata sandi baru',
+              controller: _confirmC,
+              visible: _showConfirm,
+              onToggle: () => setState(() => _showConfirm = !_showConfirm),
+              validator: _validateConfirm,
+              action: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+            ),
+
+            // Pesan error dari server
+            if (_serverError != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDECEA),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      size: 18,
+                      color: _kDanger,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _serverError!,
+                        style: const TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 13,
+                          color: _kDanger,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 22),
+
+            // Tombol simpan
+            ElevatedButton(
+              onPressed: _loading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kInk,
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: _kInk.withAlpha(150),
+                disabledForegroundColor: Colors.white,
+                elevation: 0,
+                minimumSize: const Size.fromHeight(54),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: _loading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Simpan Kata Sandi'),
+            ),
+            const SizedBox(height: 8),
+
+            // Tombol batal
+            TextButton(
+              onPressed: _loading ? null : () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: _kBody,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                textStyle: const TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              child: const Text('Batal'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─────────────────────── Komponen ───────────────────────
 class _SectionLabel extends StatelessWidget {
   final String text;
@@ -618,7 +1034,7 @@ class _LanguagePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _kInset,                       // warna latar box
+        color: _kInset, // warna latar box
         borderRadius: BorderRadius.circular(8), // lengkung sudut
       ),
       child: Text(
@@ -628,7 +1044,7 @@ class _LanguagePill extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(
           fontFamily: _kSans,
-          fontSize: 13,                       // ukuran teks
+          fontSize: 13, // ukuran teks
           fontWeight: FontWeight.w500,
           height: 1.2,
           color: _kInk,
