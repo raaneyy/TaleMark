@@ -1064,8 +1064,7 @@ class _Avatar extends StatelessWidget {
     required this.size,
     required this.colors,
     this.initials,
-    this.imageUrl,
-  });
+  }) : imageUrl = null;
 
   @override
   Widget build(BuildContext context) {

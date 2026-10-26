@@ -250,7 +250,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 child: Image.asset(
                   'assets/images/logo_talemark.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.auto_stories_rounded,
                     size: 20,
                     color: _kInk,
@@ -676,7 +676,7 @@ void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (_, _, _) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, __, child) =>
+      transitionsBuilder: (_, animation, _, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
