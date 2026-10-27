@@ -505,7 +505,7 @@ void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, __, child) =>
+          transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
