@@ -74,22 +74,22 @@ class Book {
 
 const kaftaPicks = [
   Book(
-    title: 'The Trial',
-    author: 'Franz Kafka',
+    title: 'Hujan',
+    author: 'Tere Liye',
     rating: 4.3,
     pages: 228,
     match: 98,
   ),
   Book(
-    title: 'The Stranger',
-    author: 'Albert Camus',
+    title: 'Hujan',
+    author: 'Tere Liye',
     rating: 4.5,
     pages: 123,
     match: 94,
   ),
   Book(
-    title: 'Blindness',
-    author: 'José Saramago',
+    title: 'Hujan',
+    author: 'Tere Liye',
     rating: 4.2,
     pages: 352,
     match: 91,
@@ -221,11 +221,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _menuItem(
-                    Icons.qr_code_scanner,
-                    'Scan Barcode',
-                    _openScanner,
-                  ),
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
                 ],
@@ -756,6 +751,10 @@ class _FeaturedCard extends StatelessWidget {
                   height: 140,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/hujan.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
                     borderRadius: BorderRadius.circular(6),
                     gradient: const LinearGradient(
                       begin: Alignment.topCenter,
@@ -769,37 +768,6 @@ class _FeaturedCard extends StatelessWidget {
                         offset: Offset(0, 3),
                       ),
                     ],
-                  ),
-                  child: const Text(
-                    'HUJAN',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: kInk,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'Staff',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10,
-                      ),
-                    ),
                   ),
                 ),
               ],
