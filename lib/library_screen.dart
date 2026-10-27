@@ -8,7 +8,6 @@ const _kCard = Colors.white;
 const _kInk = Color(0xFF111111);
 const _kMuted = Color(0xFF8A8A86);
 const _kTrack = Color(0xFFF1F1EF); // latar tab & chip tidak aktif
-const _kBanner = Color(0xFFF1EEE9); // latar banner beige
 const _kSerif = 'Newsreader';
 const _kSans = 'Inter';
 
@@ -145,7 +144,6 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  bool _showBanner = true;
   int _tabIndex = 0;
   int _sortIndex = 0;
 
@@ -175,7 +173,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
           slivers: [
             SliverToBoxAdapter(child: _buildHeader()),
             SliverToBoxAdapter(child: _buildTabs()),
-            if (_showBanner) SliverToBoxAdapter(child: _buildBanner()),
             SliverToBoxAdapter(child: _buildFavoritesSection()),
             SliverToBoxAdapter(child: _buildSortChips()),
             SliverPadding(
@@ -309,143 +306,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   onTap: () => setState(() => _tabIndex = i),
                 ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Banner Reading Tracker Recovery ──
-  Widget _buildBanner() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
-        decoration: BoxDecoration(
-          color: _kBanner,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.timelapse_rounded,
-                    size: 18,
-                    color: _kInk,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'READING TRACKER RECOVERY',
-                        style: TextStyle(
-                          fontFamily: _kSans,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.8,
-                          color: _kMuted,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Forgot to turn on the Pomodoro during reading?',
-                        style: TextStyle(
-                          fontFamily: _kSerif,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: _kInk,
-                          height: 1.25,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Your reading tracker still important.\nInput reading progress manually to keep up the reading synchronization.',
-                        style: TextStyle(
-                          fontFamily: _kSans,
-                          fontSize: 12,
-                          color: _kMuted,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => setState(() => _showBanner = false),
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Icon(Icons.close_rounded, size: 18, color: _kInk),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Flexible(
-                  child: SizedBox(
-                    height: 38,
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.edit_calendar_outlined, size: 15),
-                      label: const Text(
-                        'Record reading progress manually',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: _kSans,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _kInk,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                TextButton(
-                  onPressed: () => setState(() => _showBanner = false),
-                  style: TextButton.styleFrom(
-                    foregroundColor: _kMuted,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Skip for now',
-                    style: TextStyle(fontFamily: _kSans, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -645,7 +505,7 @@ void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-          transitionsBuilder: (_, animation, __, child) =>
+      transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
