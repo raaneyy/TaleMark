@@ -472,8 +472,8 @@ class _SortChip extends StatelessWidget {
 void _openDetail(BuildContext context, BookModel book) {
   Navigator.of(context).push(
     PageRouteBuilder(
-      pageBuilder: (_, __, ___) => BookDetailScreen(book: book),
-      transitionsBuilder: (_, animation, __, child) =>
+      pageBuilder: (context, animation, secondaryAnimation) => BookDetailScreen(book: book),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
           FadeTransition(opacity: animation, child: child),
       transitionDuration: const Duration(milliseconds: 280),
     ),
@@ -524,7 +524,7 @@ class _CoverArt extends StatelessWidget {
             : Image.asset(
                 book.coverAsset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => fallback,
+                errorBuilder: (ctx, err, stack) => fallback,
               ),
       ),
     );

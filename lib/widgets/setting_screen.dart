@@ -259,6 +259,213 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  void _showAbout() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: _kInset,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.auto_stories_outlined, size: 28, color: _kInk),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'TaleMark',
+                style: TextStyle(
+                  fontFamily: _kSerif,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
+                  color: _kInk,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Edisi Cetak Ke-IV  •  v2.4.0',
+                style: TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 13,
+                  color: _kSub,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'TaleMark adalah aplikasi pelacak bacaan dan catatan literasi personal. '
+                'Dirancang untuk pembaca yang ingin mendokumentasikan perjalanan membaca '
+                'mereka dengan cara yang bermakna.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: _kSans,
+                  fontSize: 14,
+                  height: 1.5,
+                  color: _kBody,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: TextButton.styleFrom(
+                    backgroundColor: _kInset,
+                    foregroundColor: _kInk,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Tutup'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showGuidelines() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, controller) => ListView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0DE),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Panduan Komunitas & Syarat',
+              style: TextStyle(
+                fontFamily: _kSerif,
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+                color: _kInk,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Terakhir diperbarui: Oktober 2026',
+              style: TextStyle(
+                fontFamily: _kSans,
+                fontSize: 13,
+                color: _kSub,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _guideSection('1. Etika Kurasi Catatan', [
+              'Kutipan harus berasal dari buku yang benar-benar Anda baca.',
+              'Sertakan nomor halaman jika memungkinkan.',
+              'Berikan atribusi yang tepat kepada penulis.',
+            ]),
+            _guideSection('2. Konten yang Dilarang', [
+              'Spoiler tanpa peringatan yang jelas.',
+              'Ujaran kebencian atau diskriminasi.',
+              'Spam atau promosi berlebihan.',
+              'Plagiarisme atau pelanggaran hak cipta.',
+            ]),
+            _guideSection('3. Interaksi Komunitas', [
+              'Bersikap sopan dan menghargai pendapat pembaca lain.',
+              'Diskusi harus konstruktif dan relevan.',
+              'Gunakan fitur laporan untuk konten yang melanggar.',
+            ]),
+            _guideSection('4. Privasi & Data', [
+              'TaleMark menghormati privasi data pembaca.',
+              'Data bacaan Anda tidak dibagikan tanpa izin.',
+              'Anda dapat menghapus akun kapan saja.',
+            ]),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: TextButton.styleFrom(
+                  backgroundColor: _kInset,
+                  foregroundColor: _kInk,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Saya Mengerti'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _guideSection(String title, List<String> items) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: _kSans,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: _kInk,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• ', style: TextStyle(fontSize: 14, color: _kBody)),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: const TextStyle(
+                        fontFamily: _kSans,
+                        fontSize: 14,
+                        height: 1.5,
+                        color: _kBody,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -333,14 +540,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   showChevron: true,
-                  onTap: _soon,
+                  onTap: _showAbout,
                 ),
                 _SettingRow(
                   icon: Icons.menu_book_outlined,
                   title: 'Panduan Komunitas & Syarat',
                   subtitle: 'Etika kurasi catatan buku',
                   showChevron: true,
-                  onTap: _soon,
+                  onTap: _showGuidelines,
                 ),
               ],
             ),
@@ -1177,7 +1384,7 @@ class _Avatar extends StatelessWidget {
               child: Image.asset(
                 'assets/images/avatar.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => fallback,
+                errorBuilder: (ctx, err, stack) => fallback,
               ),
             ),
           ),

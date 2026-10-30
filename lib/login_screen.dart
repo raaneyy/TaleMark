@@ -111,8 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      final email = _emailController.text.trim();
-                      final password = _passwordController.text;
+                      // TODO: kirim data ke backend untuk autentikasi
+                      debugPrint('Login: ${_emailController.text.trim()}');
                       
                       Navigator.pushReplacement(
                         context,

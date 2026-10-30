@@ -640,7 +640,7 @@ class _ScanBookPageState extends State<ScanBookPage> with SingleTickerProviderSt
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: AnimatedBuilder(
               animation: _anim,
-              builder: (_, _) => Align(
+              builder: (context, child) => Align(
                 alignment: Alignment(0, -1 + 2 * _anim.value),
                 child: Container(
                   height: 2.5,
@@ -678,7 +678,7 @@ class _ScanBookPageState extends State<ScanBookPage> with SingleTickerProviderSt
               children: [
                 AnimatedBuilder(
                   animation: _anim,
-                  builder: (_, _) => Opacity(
+                  builder: (context, child) => Opacity(
                     opacity: 0.4 + 0.6 * _anim.value,
                     child: Container(
                       width: 9,

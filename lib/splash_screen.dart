@@ -13,7 +13,6 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnim;
   late Animation<double> _scaleAnim;
-  late Animation<double> _slideAnim;
 
   @override
   void initState() {
@@ -36,12 +35,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _slideAnim = Tween<double>(begin: 20, end: 0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
-      ),
-    );
 
     _controller.forward();
 
@@ -51,8 +44,8 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 600),
-            pageBuilder: (_, _, _) => const LoginScreen(),
-            transitionsBuilder: (_, animation, _, child) {
+            pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },
           ),
@@ -94,6 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
 
 /// Menggambar logo TaleMark: dua kurva lengkung (arch) yang menyatu di atas
 /// dengan garis horizontal di puncak, dan satu tiang vertikal di tengah.
+// ignore: unused_element
 class _TaleMarkLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

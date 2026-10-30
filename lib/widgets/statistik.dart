@@ -58,19 +58,18 @@ const _favBooks = [
     'Hujan',
     'Tere Liye',
     '10 Days',
-    coverAsset: 'assets/images/hujan.png',
+    coverAsset: 'assets/images/hujan.jpeg',
   ),
   _FavBook(
-    'Hujan',
+    'Aldebaran',
     'Tere Liye',
     '22 Days',
-    coverAsset: 'assets/images/hujan.png',
+    coverAsset: 'assets/images/aldebaran.jpeg',
   ),
   _FavBook(
-    'Hujan',
-    'Tere Liye',
+    'Invisible Cities',
+    'Italo Calvino',
     '24 Days',
-    coverAsset: 'assets/images/hujan.png',
   ),
 ];
 
@@ -174,7 +173,7 @@ class _Brand extends StatelessWidget {
           child: Image.asset(
             'assets/images/logo_talemark.png',
             fit: BoxFit.contain,
-            errorBuilder: (_, _, _) =>
+            errorBuilder: (ctx, err, stack) =>
                 const Icon(Icons.auto_stories_outlined, size: 20, color: _kInk),
           ),
         ),
@@ -543,7 +542,7 @@ class _FavBookTile extends StatelessWidget {
                   : Image.asset(
                       book.coverAsset!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => placeholder,
+                      errorBuilder: (ctx, err, stack) => placeholder,
                     ),
             ),
           ),

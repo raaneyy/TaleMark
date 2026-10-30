@@ -150,10 +150,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        final name = _nameController.text.trim();
-                        final email = _emailController.text.trim();
-                        final password = _passwordController.text;
-                        // TODO: Jalankan fungsi registrasi
+                        // TODO: Jalankan fungsi registrasi ke backend
+                        debugPrint('Register: ${_nameController.text.trim()}, ${_emailController.text.trim()}');
                       }
                     },
                     child: const Text('Buat Akun TaleMark →'),

@@ -420,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: kaftaPicks.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        separatorBuilder: (context, index) => const SizedBox(width: 10),
         itemBuilder: (_, i) => _AffinityCard(book: kaftaPicks[i]),
       ),
     );
@@ -457,7 +457,9 @@ class _Header extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  _showHomeNotifications(context);
+                },
                 icon: const Icon(
                   Icons.notifications_none,
                   size: 24,
@@ -477,6 +479,84 @@ class _Header extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void _showHomeNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Notifikasi',
+                style: TextStyle(
+                  fontFamily: kSerif,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _notifItem(Icons.auto_stories, 'Buku baru ditambahkan ke library', '5 menit lalu'),
+              _notifItem(Icons.timer, 'Sesi membaca selesai: 45 menit', '1 jam lalu'),
+              _notifItem(Icons.star_border, 'Rekomendasi baru berdasarkan bacaanmu', '3 jam lalu'),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(color: kMuted, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _notifItem(IconData icon, String text, String time) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: kChip,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: kInk),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  text,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  time,
+                  style: const TextStyle(fontSize: 12, color: kMuted),
+                ),
+              ],
+            ),
           ),
         ],
       ),

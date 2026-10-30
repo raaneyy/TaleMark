@@ -191,10 +191,10 @@ class _FeedHeader extends StatelessWidget {
               ),
             ),
           ),
-          _icon(Icons.search, () {}),
+          _icon(Icons.search, () => _showFeedSearch(context)),
           Stack(
             children: [
-              _icon(Icons.notifications_none, () {}),
+              _icon(Icons.notifications_none, () => _showFeedNotifications(context)),
               Positioned(
                 right: 9,
                 top: 8,
@@ -209,8 +209,215 @@ class _FeedHeader extends StatelessWidget {
               ),
             ],
           ),
-          _icon(Icons.tune, () {}),
+          _icon(Icons.tune, () => _showFeedFilter(context)),
         ],
+      ),
+    );
+  }
+
+  // ── Pencarian Feed ──
+  static void _showFeedSearch(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Cari di Feed',
+              style: TextStyle(
+                fontFamily: _serif,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'Cari postingan, kutipan, atau penulis…',
+                hintStyle: const TextStyle(color: _muted, fontSize: 14),
+                prefixIcon: const Icon(Icons.search, color: _muted),
+                filled: true,
+                fillColor: _chip,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onSubmitted: (query) {
+                Navigator.pop(ctx);
+                if (query.trim().isNotEmpty) {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text('Pencarian "$query" — fitur segera hadir')),
+                    );
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Notifikasi Feed ──
+  static void _showFeedNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Notifikasi',
+                style: TextStyle(
+                  fontFamily: _serif,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _notifTile(Icons.favorite, 'Nadia menyukai kutipanmu', '18 menit lalu'),
+              _notifTile(Icons.person_add, 'Marcus mulai mengikutimu', '1 jam lalu'),
+              _notifTile(Icons.mode_comment_outlined, 'Julian mengomentari postinganmu', '2 jam lalu'),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(color: _muted, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget _notifTile(IconData icon, String text, String time) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: _chip,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 20, color: _ink),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  text,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  time,
+                  style: const TextStyle(fontSize: 12, color: _muted),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Filter Feed ──
+  static void _showFeedFilter(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Filter Feed',
+                style: TextStyle(
+                  fontFamily: _serif,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.auto_stories_outlined),
+                title: const Text('Kutipan'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(content: Text('Filter: Kutipan — segera hadir')),
+                    );
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.rate_review_outlined),
+                title: const Text('Ulasan Buku'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(content: Text('Filter: Ulasan Buku — segera hadir')),
+                    );
+                },
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.forum_outlined),
+                title: const Text('Diskusi'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(content: Text('Filter: Diskusi — segera hadir')),
+                    );
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1025,7 +1232,7 @@ class _TabChipsState extends State<_TabChips> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: widget.labels.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
               itemBuilder: (_, i) => ChoiceChip(
                 label: Text(widget.labels[i]),
                 selected: _sel == i,
@@ -2077,6 +2284,13 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
                 onPressed: () {
                   // TODO: kirim _ctrl.text, _public, dan _tags ke backend
                   Navigator.pop(context);
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(
+                        content: Text('Kutipan berhasil diposting!'),
+                      ),
+                    );
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: _ink,

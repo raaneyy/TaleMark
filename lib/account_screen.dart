@@ -331,7 +331,7 @@ class _Avatar extends StatelessWidget {
               child: Image.asset(
                 'assets/images/avatar.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => fallback,
+                errorBuilder: (ctx, err, stack) => fallback,
               ),
             ),
           ),
@@ -719,7 +719,7 @@ class _MiniCover extends StatelessWidget {
             : Image.asset(
                 asset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => placeholder,
+                errorBuilder: (ctx, err, stack) => placeholder,
               ),
       ),
     );
