@@ -203,38 +203,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/logo_talemark.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.auto_stories_rounded,
-                    size: 20,
-                    color: _kInk,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Text(
-                'TaleMark',
-                style: TextStyle(
-                  fontFamily: _kSerif,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: _kInk,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 36),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
