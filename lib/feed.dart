@@ -73,7 +73,6 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     final julianBlocked = _blocked.contains('@julianm');
-    final marcusBlocked = _blocked.contains('@marcusread');
 
     return Scaffold(
       backgroundColor: _bg,
@@ -124,14 +123,6 @@ class _FeedPageState extends State<FeedPage> {
                 onBlock: () => _blockUser('@julianm', 'Julian Mahesa'),
               ),
             ],
-            if (!marcusBlocked) ...[
-              const SizedBox(height: 16),
-              _DiscussionPostCard(
-                onBlock: () => _blockUser('@marcusread', 'Marcus Chen'),
-              ),
-            ],
-            if (julianBlocked && marcusBlocked)
-              _BlockedNotice(onReset: () => setState(_blocked.clear)),
           ],
         ),
       ),
@@ -194,7 +185,10 @@ class _FeedHeader extends StatelessWidget {
           _icon(Icons.search, () => _showFeedSearch(context)),
           Stack(
             children: [
-              _icon(Icons.notifications_none, () => _showFeedNotifications(context)),
+              _icon(
+                Icons.notifications_none,
+                () => _showFeedNotifications(context),
+              ),
               Positioned(
                 right: 9,
                 top: 8,
@@ -226,7 +220,10 @@ class _FeedHeader extends StatelessWidget {
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(
-          20, 16, 20, MediaQuery.of(ctx).viewInsets.bottom + 16,
+          20,
+          16,
+          20,
+          MediaQuery.of(ctx).viewInsets.bottom + 16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -260,7 +257,11 @@ class _FeedHeader extends StatelessWidget {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      SnackBar(content: Text('Pencarian "$query" — fitur segera hadir')),
+                      SnackBar(
+                        content: Text(
+                          'Pencarian "$query" — fitur segera hadir',
+                        ),
+                      ),
                     );
                 }
               },
@@ -296,16 +297,31 @@ class _FeedHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _notifTile(Icons.favorite, 'Nadia menyukai kutipanmu', '18 menit lalu'),
-              _notifTile(Icons.person_add, 'Marcus mulai mengikutimu', '1 jam lalu'),
-              _notifTile(Icons.mode_comment_outlined, 'Julian mengomentari postinganmu', '2 jam lalu'),
+              _notifTile(
+                Icons.favorite,
+                'Nadia menyukai kutipanmu',
+                '18 menit lalu',
+              ),
+              _notifTile(
+                Icons.person_add,
+                'Marcus mulai mengikutimu',
+                '1 jam lalu',
+              ),
+              _notifTile(
+                Icons.mode_comment_outlined,
+                'Julian mengomentari postinganmu',
+                '2 jam lalu',
+              ),
               const SizedBox(height: 8),
               Center(
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: const Text(
                     'Tutup',
-                    style: TextStyle(color: _muted, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: _muted,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -337,12 +353,12 @@ class _FeedHeader extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                Text(
-                  time,
-                  style: const TextStyle(fontSize: 12, color: _muted),
-                ),
+                Text(time, style: const TextStyle(fontSize: 12, color: _muted)),
               ],
             ),
           ),
@@ -384,7 +400,9 @@ class _FeedHeader extends StatelessWidget {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      const SnackBar(content: Text('Filter: Kutipan — segera hadir')),
+                      const SnackBar(
+                        content: Text('Filter: Kutipan — segera hadir'),
+                      ),
                     );
                 },
               ),
@@ -397,7 +415,9 @@ class _FeedHeader extends StatelessWidget {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      const SnackBar(content: Text('Filter: Ulasan Buku — segera hadir')),
+                      const SnackBar(
+                        content: Text('Filter: Ulasan Buku — segera hadir'),
+                      ),
                     );
                 },
               ),
@@ -410,7 +430,9 @@ class _FeedHeader extends StatelessWidget {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
                     ..showSnackBar(
-                      const SnackBar(content: Text('Filter: Diskusi — segera hadir')),
+                      const SnackBar(
+                        content: Text('Filter: Diskusi — segera hadir'),
+                      ),
                     );
                 },
               ),
@@ -459,189 +481,6 @@ class _Composer extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DiscussionPostCard extends StatelessWidget {
-  final VoidCallback? onBlock;
-
-  const _DiscussionPostCard({this.onBlock});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _card,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const _Avatar(
-                  size: 48,
-                  colors: [Color(0xFF37474F), Color(0xFF90A4AE)],
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              'Marcus Chen',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              '•  @marcusread',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: _muted, fontSize: 15),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'KEMARIN',
-                        style: TextStyle(
-                          color: _muted,
-                          fontSize: 13,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const _Pill(
-                  label: 'Diskusi',
-                  bg: _chip,
-                  fg: _muted,
-                  bold: true,
-                ),
-                const SizedBox(width: 2),
-                // Titik tiga: Laporkan postingan / Blokir akun
-                _PostMenuButton(
-                  author: 'Marcus Chen',
-                  handle: '@marcusread',
-                  onBlock: onBlock,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _chip,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'THE STRANGER — ALBERT CAMUS',
-                          style: TextStyle(
-                            color: _muted,
-                            fontSize: 13,
-                            letterSpacing: 1.1,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'Edisi Cetak 1954',
-                          style: TextStyle(color: _muted, fontSize: 13),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '“In the depth of winter, I finally learned that within me there lay an invincible summer.”',
-                    style: TextStyle(
-                      fontFamily: _serif,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 22,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: _chip,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Nadia Pramudita',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        '18 jam lalu',
-                        style: TextStyle(color: _muted, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Selalu menemukan kekuatan baru dari baris ini setiap kali menghadapi masa-masa sulit dalam penulisan tesis.',
-                    style: TextStyle(fontSize: 16, height: 1.4),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            const _PostActions(
-              likes: 64,
-              commentLabel: '19 Komentar',
-              showShare: false,
             ),
           ],
         ),
@@ -1035,7 +874,11 @@ class _BookBox extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _HujanCover(width: 56, height: 84),
+          const _HujanCover(
+            width: 56,
+            height: 84,
+            coverasset: 'assets/images/hujan.jpeg',
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -1267,11 +1110,8 @@ class _Avatar extends StatelessWidget {
   final List<Color> colors;
   final String? initials;
   final String? imageUrl; // isi bila pakai foto profil asli
-  const _Avatar({
-    required this.size,
-    required this.colors,
-    this.initials,
-  }) : imageUrl = null;
+  const _Avatar({required this.size, required this.colors, this.initials})
+    : imageUrl = null;
 
   @override
   Widget build(BuildContext context) {
@@ -1344,39 +1184,53 @@ class _Pill extends StatelessWidget {
 
 class _HujanCover extends StatelessWidget {
   final double width, height;
-  const _HujanCover({required this.width, required this.height});
+  final String? coverasset;
 
-  // Ganti isi build dengan Image.network / Image.asset untuk sampul asli.
+  const _HujanCover({
+    required this.width,
+    required this.height,
+    this.coverasset,
+  });
+
   @override
   Widget build(BuildContext context) {
+    final decoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(4),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x33000000),
+          blurRadius: 6,
+          offset: Offset(0, 2),
+        ),
+      ],
+      image: coverasset == null
+          ? null
+          : DecorationImage(image: AssetImage(coverasset!), fit: BoxFit.cover),
+      gradient: coverasset == null
+          ? const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF4FB4D8), Color(0xFFBEE6F2)],
+            )
+          : null,
+    );
+
     return Container(
       width: width,
       height: height,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF4FB4D8), Color(0xFFBEE6F2)],
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        'HUJAN',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w900,
-          fontSize: width * 0.2,
-          letterSpacing: 0.5,
-        ),
-      ),
+      decoration: decoration,
+      child: coverasset == null
+          ? Text(
+              'HUJAN',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: width * 0.2,
+                letterSpacing: 0.5,
+              ),
+            )
+          : null,
     );
   }
 }
@@ -2282,7 +2136,6 @@ class _ShareQuoteSheetState extends State<ShareQuoteSheet> {
               height: 48,
               child: FilledButton(
                 onPressed: () {
-                  // TODO: kirim _ctrl.text, _public, dan _tags ke backend
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'library_screen.dart';
+import 'widgets/add_quote_dialog.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
@@ -110,21 +111,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       ? 0.0
       : (_currentPage / book.totalPages).clamp(0.0, 1.0).toDouble();
 
-  String get _timeLeft {
-    final mins = ((book.totalPages - _currentPage) * _minutesPerPage).round();
-    if (mins <= 0) return 'Finished';
-    final h = mins ~/ 60;
-    final m = mins % 60;
-    if (h == 0) return '$m mins';
-    if (m == 0) return '$h hr';
-    return '$h hr $m mins';
-  }
-
-  String get _totalHours {
-    final h = (book.totalPages * _minutesPerPage / 60 * 2).round() / 2;
-    return h == h.roundToDouble() ? h.toInt().toString() : h.toStringAsFixed(1);
-  }
-
   String _fmtNumber(int n) => n.toString().replaceAllMapped(
     RegExp(r'\B(?=(\d{3})+(?!\d))'),
     (m) => ',',
@@ -147,40 +133,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   }
 
   Future<void> _addQuote() async {
-    final ctrl = TextEditingController();
-    final text = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text(
-          'New Quote',
-          style: TextStyle(fontFamily: _kSerif, fontSize: 19),
-        ),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          minLines: 3,
-          maxLines: 6,
-          style: const TextStyle(fontSize: 14),
-          decoration: const InputDecoration(
-            hintText: 'Tulis kutipan dari buku ini...',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    );
-    ctrl.dispose();
-    if (text == null || text.isEmpty || !mounted) return;
+    final text = await showAddQuoteDialog(context);
+    if (text == null || text.trim().isEmpty || !mounted) return;
     setState(
-      () => _quotes.add(BookQuote(label: 'PAGE $_currentPage', text: text)),
+      () => _quotes.add(BookQuote(label: 'PAGE $_currentPage', text: text.trim())),
     );
   }
 
@@ -375,7 +331,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       if (book.year != null) '${book.year}',
       if (book.format != null) book.format!,
       '${book.totalPages} pages',
-      '~$_totalHours hrs',
     ];
 
     final spans = <InlineSpan>[];
@@ -574,15 +529,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               valueColor: const AlwaysStoppedAnimation<Color>(_kInk),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Estimated time left: $_timeLeft',
-            style: const TextStyle(
-              fontFamily: _kSans,
-              fontSize: 11.5,
-              color: _kMuted,
-            ),
-          ),
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -750,7 +696,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'PRIVATE LEDGER',
+            'Your Rating',
             style: TextStyle(
               fontFamily: _kSans,
               fontSize: 10.5,
@@ -761,7 +707,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Your Critical Verdict',
+            'Give rating for this book',
             style: TextStyle(
               fontFamily: _kSerif,
               fontSize: 19,
@@ -819,7 +765,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             TextSpan(
               children: [
                 const TextSpan(
-                  text: 'Marginalia & Excerpts',
+                  text: 'Your Quotes',
                   style: TextStyle(
                     fontFamily: _kSerif,
                     fontSize: 19,
@@ -886,7 +832,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: _QuoteCard(
             quote: q,
-            onPost: () => _snack('Fitur posting belum tersedia'),
+            onPost: () => _snack('not ready implemented'),
           ),
         ),
     ];

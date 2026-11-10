@@ -60,6 +60,9 @@ flutter:
     - assets/images/talemark_logo.jpg
     - assets/images/hujan.jpeg
     - assets/images/aldebaran.jpeg
+    - assets/images/bumi_manusia.jpg
+    - assets/images/brief_history_of_time.jpg
+    - assets/images/sapiens.jpg
 
   fonts:
     - family: Inter

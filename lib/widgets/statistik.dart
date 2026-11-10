@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'talemark_header.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
@@ -57,19 +58,14 @@ const _favBooks = [
   _FavBook(
     'Hujan',
     'Tere Liye',
-    '10 Days',
+    '22 Days',
     coverAsset: 'assets/images/hujan.jpeg',
   ),
   _FavBook(
     'Aldebaran',
     'Tere Liye',
-    '22 Days',
+    '10 Days',
     coverAsset: 'assets/images/aldebaran.jpeg',
-  ),
-  _FavBook(
-    'Invisible Cities',
-    'Italo Calvino',
-    '24 Days',
   ),
 ];
 
@@ -117,12 +113,12 @@ class _StatsScreenState extends State<StatsScreen> {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+          padding: const EdgeInsets.only(bottom: 28),
           children: [
-            const _Brand(),
-            const SizedBox(height: 14),
+            const TaleMarkHeader(),
+            const SizedBox(height: 10),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Statistik Baca',
                 style: TextStyle(
@@ -139,13 +135,25 @@ class _StatsScreenState extends State<StatsScreen> {
               onChanged: (i) => setState(() => _filter = i),
             ),
             const SizedBox(height: 22),
-            const _StreakCard(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _StreakCard(),
+            ),
             const SizedBox(height: 14),
-            const _SummaryGrid(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _SummaryGrid(),
+            ),
             const SizedBox(height: 22),
-            const _FavoriteBooksCard(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _FavoriteBooksCard(),
+            ),
             const SizedBox(height: 22),
-            const _GenreCard(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: _GenreCard(),
+            ),
           ],
         ),
       ),
@@ -154,43 +162,8 @@ class _StatsScreenState extends State<StatsScreen> {
 }
 
 // ─────────────────────── Brand ───────────────────────
-class _Brand extends StatelessWidget {
-  const _Brand();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(width: 4),
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          padding: const EdgeInsets.all(4),
-          child: Image.asset(
-            'assets/images/logo_talemark.png',
-            fit: BoxFit.contain,
-            errorBuilder: (ctx, err, stack) =>
-                const Icon(Icons.auto_stories_outlined, size: 20, color: _kInk),
-          ),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'TaleMark',
-          style: TextStyle(
-            fontFamily: _kSerif,
-            fontSize: 22,
-            fontWeight: FontWeight.w700, // bold
-            color: _kInk,
-          ),
-        ),
-      ],
-    );
-  }
-}
+/// Alias untuk kompatibilitas jika masih ada yang memanggil _Brand
+typedef _Brand = TaleMarkHeader;
 
 // ─────────────────────── Filter chips ───────────────────────
 class _FilterChips extends StatelessWidget {
@@ -203,7 +176,7 @@ class _FilterChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           for (int i = 0; i < _filters.length; i++) ...[
@@ -576,24 +549,7 @@ class _FavBookTile extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _kInk,
-              borderRadius: BorderRadius.circular(5),
             ),
-            child: Text(
-              book.days,
-              style: const TextStyle(
-                fontFamily: _kSans,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
           const SizedBox(width: 4),
         ],
       ),

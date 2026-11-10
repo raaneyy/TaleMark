@@ -6,6 +6,8 @@ import 'tambah_buku_screen.dart';
 import 'library_screen.dart';
 import 'feed.dart';
 import 'widgets/statistik.dart';
+import 'widgets/talemark_header.dart';
+import 'widgets/add_quote_dialog.dart';
 import 'account_screen.dart';
 
 void main() => runApp(const TaleMarkApp());
@@ -17,7 +19,7 @@ const kCard = Colors.white;
 const kInk = Color(0xFF111111);
 const kMuted = Color(0xFF6B6B70);
 const kChip = Color(0xFFEDEDF0);
-const kSerif = 'Georgia'; // ganti dengan font serif pilihan (mis. google_fonts)
+const kSerif = 'Newsreader';
 
 class TaleMarkApp extends StatelessWidget {
   const TaleMarkApp({super.key});
@@ -59,6 +61,7 @@ class Book {
   final int? match;
   final String? note;
   final String? friends;
+  final String? coverAsset;
 
   const Book({
     required this.title,
@@ -69,6 +72,7 @@ class Book {
     this.match,
     this.note,
     this.friends,
+    this.coverAsset,
   });
 }
 
@@ -79,6 +83,7 @@ const kaftaPicks = [
     rating: 4.3,
     pages: 228,
     match: 98,
+    coverAsset: 'assets/images/hujan.jpeg',
   ),
   Book(
     title: 'Hujan',
@@ -86,6 +91,7 @@ const kaftaPicks = [
     rating: 4.5,
     pages: 123,
     match: 94,
+    coverAsset: 'assets/images/hujan.jpeg',
   ),
   Book(
     title: 'Hujan',
@@ -93,33 +99,37 @@ const kaftaPicks = [
     rating: 4.2,
     pages: 352,
     match: 91,
+    coverAsset: 'assets/images/hujan.jpeg',
   ),
 ];
 
 const trending = [
   Book(
-    title: "If on a winter's night a traveler",
-    author: 'Italo Calvino',
-    genre: 'METANARRATIVE',
+    title: "Bumi Manusia",
+    author: 'Pramoedya Ananta Toer',
+    genre: 'HISTORICAL FICTION',
     rating: 4.6,
-    pages: 260,
-    friends: '14 friends read this',
+    pages: 505,
+    friends: 'Trending this week',
+    coverAsset: 'assets/images/bumi_manusia.jpg',
   ),
   Book(
-    title: 'Ficciones',
-    author: 'Jorge Luis Borges',
-    genre: 'SHORT STORIES',
+    title: 'A brief history of time',
+    author: 'Stephen Hawking',
+    genre: 'SCIENCE',
     rating: 4.7,
-    pages: 174,
-    note: 'Philosophical canon',
+    pages: 256,
+    note: 'Trending this week',
+    coverAsset: 'assets/images/brief_history_of_time.jpg',
   ),
   Book(
-    title: 'The Myth of Sisyphus',
-    author: 'Albert Camus',
-    genre: 'ESSAY · EXISTENTIALISM',
+    title: 'Sapiens: A Brief History of Humankind',
+    author: 'Yuval Noah Harari',
+    genre: 'HISTORY',
     rating: 4.5,
-    pages: 212,
+    pages: 498,
     note: 'Trending this week',
+    coverAsset: 'assets/images/sapiens.jpg',
   ),
 ];
 
@@ -175,6 +185,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onAddQuote() {
+    _closeMenu();
+    showAddQuoteDialog(context);
+  }
+
   Widget _menuItem(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -222,6 +237,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
+                  _menuItem(
+                    Icons.format_quote_rounded,
+                    'Add Quote',
+                    _onAddQuote,
+                  ),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
                 ],
               ),
@@ -246,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView(
                   padding: const EdgeInsets.only(bottom: 90),
                   children: [
-                    const _Header(),
+                    const TaleMarkHeader(),
                     _SearchBar(onScan: _openScanner),
                     const SizedBox(height: 10),
                     _buildChips(),
@@ -429,140 +449,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ───────────────────────── Header & Search ─────────────────────────
 
-class _Header extends StatelessWidget {
-  const _Header();
+/// Alias untuk kompatibilitas jika ada yang memanggil _Header
+typedef _Header = TaleMarkHeader;
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/images/logo_talemark.png',
-            height: 36,
-            width: 36,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'TaleMark',
-            style: TextStyle(
-              fontFamily: kSerif,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          Stack(
-            children: [
-              IconButton(
-                onPressed: () {
-                  _showHomeNotifications(context);
-                },
-                icon: const Icon(
-                  Icons.notifications_none,
-                  size: 24,
-                  color: kMuted,
-                ),
-              ),
-              Positioned(
-                right: 10,
-                top: 8,
-                child: Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: kInk,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  static void _showHomeNotifications(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Notifikasi',
-                style: TextStyle(
-                  fontFamily: kSerif,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _notifItem(Icons.auto_stories, 'Buku baru ditambahkan ke library', '5 menit lalu'),
-              _notifItem(Icons.timer, 'Sesi membaca selesai: 45 menit', '1 jam lalu'),
-              _notifItem(Icons.star_border, 'Rekomendasi baru berdasarkan bacaanmu', '3 jam lalu'),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text(
-                    'Tutup',
-                    style: TextStyle(color: kMuted, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  static Widget _notifItem(IconData icon, String text, String time) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: kChip,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 20, color: kInk),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  text,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  time,
-                  style: const TextStyle(fontSize: 12, color: kMuted),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+void _showHomeNotifications(BuildContext context) =>
+    showTaleMarkNotifications(context);
 
 class _SearchBar extends StatelessWidget {
   final VoidCallback? onScan;
@@ -596,7 +487,10 @@ class _SearchBar extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Search books, authors, ISBN, genres…',
                   hintStyle: TextStyle(color: kMuted, fontSize: 13),
+                  filled: false,
                   border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -805,6 +699,33 @@ class _CoverPlaceholder extends StatelessWidget {
   }
 }
 
+class _CoverImage extends StatelessWidget {
+  final String? asset;
+  final double width, height;
+
+  const _CoverImage({
+    required this.asset,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (asset == null) {
+      return _CoverPlaceholder(width: width, height: height);
+    }
+
+    return Image.asset(
+      asset!,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          _CoverPlaceholder(width: width, height: height),
+    );
+  }
+}
+
 // ───────────────────────── Featured Card ─────────────────────────
 
 class _FeaturedCard extends StatelessWidget {
@@ -964,56 +885,63 @@ class _AffinityCard extends StatelessWidget {
     return SizedBox(
       width: 140,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 165,
-            decoration: BoxDecoration(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              height: 165,
+              width: double.infinity,
               color: kCard,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Material(
-                    color: Colors.white,
-                    shape: const CircleBorder(),
-                    elevation: 1.5,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () {},
-                      child: const Padding(
-                        padding: EdgeInsets.all(5),
-                        child: Icon(Icons.add, size: 16),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (book.coverAsset != null)
+                    _CoverImage(
+                      asset: book.coverAsset,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(),
+                      elevation: 1.5,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {},
+                        child: const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Icon(Icons.add, size: 16),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 6,
-                  bottom: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: kInk,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '${book.match}% match',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10,
+                  Positioned(
+                    left: 6,
+                    bottom: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: kInk,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${book.match}% match',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -1071,7 +999,7 @@ class _TrendingTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _CoverPlaceholder(width: 70, height: 105),
+            _CoverImage(asset: book.coverAsset, width: 70, height: 105),
             const SizedBox(width: 12),
             Expanded(
               child: SizedBox(

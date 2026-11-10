@@ -39,11 +39,11 @@ class BookModel {
   final String? coverAsset;
 
   /// Info tambahan untuk halaman detail (semua opsional).
-  final String? subGenres; // contoh: 'Fiksi Ilmiah, Distopia, Romance'
+  final String? subGenres;
   final int? year;
-  final String? format; // contoh: 'Novella'
-  final int? readers; // jumlah pembaca
-  final List<BookQuote> quotes; // kutipan yang tersimpan
+  final String? format; 
+  final int? readers; 
+  final List<BookQuote> quotes; 
 
   const BookModel({
     required this.title,
@@ -126,15 +126,54 @@ final List<BookModel> _allBooks = [
     description: 'Petualangan epik di negeri yang penuh misteri dan sihir.',
     isFavorite: true,
   ),
+  const BookModel(
+    title: 'Bumi Manusia',
+    author: 'Pramoedya Ananta Toer',
+    genre: 'Historical Fiction',
+    coverTopColor: Color(0xFFBFAE8F),
+    coverBottomColor: Color(0xFF7A5C3B),
+    coverAsset: 'assets/images/bumi_manusia.jpg',
+    progress: 0.5,
+    totalPages: 500,
+    currentPage: 250,
+    rating: 4.8,
+    description: 'Kisah tentang perjuangan dan cinta di masa kolonial Belanda.',
+    isFavorite: false,
+  ),
+  const BookModel(
+    title: 'A Brief History of Time',
+    author: 'Stephen Hawking',
+    genre: 'Science',
+    coverTopColor: Color(0xFF1E1E1E),
+    coverBottomColor: Color(0xFF4B4B4B),
+    coverAsset: 'assets/images/brief_history_of_time.jpg',
+    progress: 0.75,
+    totalPages: 256,
+    currentPage: 192,
+    rating: 4.7,
+    description: 'Penjelasan tentang alam semesta, waktu, dan teori relativitas dengan cara yang mudah dipahami.',
+    isFavorite: true,
+  ),
+  const BookModel(
+    title: 'Sapiens: A Brief History of Humankind',
+    author: 'Yuval Noah Harari',
+    genre: 'History',
+    coverTopColor: Color(0xFF8B4513),
+    coverBottomColor: Color(0xFFA0522D),
+    coverAsset: 'assets/images/sapiens.jpg',
+    progress: 0.0,
+    totalPages: 400,
+    currentPage: 0,
+    rating: 4.6,
+    description: 'Perjalanan menarik melalui sejarah umat manusia dari zaman prasejarah hingga kini.',
+    isFavorite: false,
+  ),
 ];
 
 // ─────────────────────── Library Screen ───────────────────────
 class LibraryScreen extends StatefulWidget {
-  /// Tampilkan bottom navigation bar bawaan layar ini.
-  /// Set false kalau navigasi sudah ditangani di main.dart / shell lain.
   final bool showBottomNav;
-
-  /// Dipanggil saat item bottom nav ditekan (0 Home … 4 Account).
+  
   final ValueChanged<int>? onNavTap;
 
   const LibraryScreen({super.key, this.showBottomNav = true, this.onNavTap});
@@ -221,16 +260,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         height: 1.1,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '42 Editions Curated',
-                      style: TextStyle(
-                        fontFamily: _kSans,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black.withAlpha(220),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -294,7 +323,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               Icon(Icons.auto_awesome_outlined, size: 18, color: _kInk),
               SizedBox(width: 8),
               Text(
-                'Favorite Volumes',
+                'Favorite Books',
                 style: TextStyle(
                   fontFamily: _kSerif,
                   fontSize: 20,
@@ -524,7 +553,10 @@ class _CoverArt extends StatelessWidget {
             : Image.asset(
                 book.coverAsset!,
                 fit: BoxFit.cover,
-                errorBuilder: (ctx, err, stack) => fallback,
+                errorBuilder: (ctx, err, stack) {
+                  debugPrint('Gagal load ${book.coverAsset}: $err');
+                  return fallback;
+                }
               ),
       ),
     );

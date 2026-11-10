@@ -62,22 +62,24 @@ class _FeedPost {
     required this.bookTitle,
     required this.author,
     required this.text,
+    this.coverAsset,
     this.rating = 0,
     this.marginalia,
     this.likes = 0,
     this.comments = 0,
-  }) : coverAsset = null;
+  });
 }
 
 const List<_FeedPost> _posts = [
   _FeedPost(
     kind: _PostKind.finished,
     time: '2 hours ago',
-    detail: 'Milan, Italy',
-    bookTitle: 'Invisible Cities',
-    author: 'Italo Calvino',
+    detail: 'page 112',
+    bookTitle: 'Bumi Manusia',
+    author: 'Pramoedya Ananta Toer',
+    coverAsset: 'assets/images/bumi_manusia.jpg',
     rating: 5.0,
-    text: 'A dreamlike tour of imagined cities, told in quiet little portraits. An absolute masterpiece of architectural imagination.',
+    text: 'Buku yang sangat membuka mata tentang sejarah dan budaya Indonesia. Sangat direkomendasikan untuk dibaca.',
     likes: 42,
     comments: 9,
   ),
@@ -85,10 +87,11 @@ const List<_FeedPost> _posts = [
     kind: _PostKind.notes,
     time: '5 hours ago',
     detail: 'Page 112',
-    bookTitle: 'The Stranger',
-    author: 'Albert Camus',
-    text: 'A sentence worth underlining, kept here for quiet hours and slow rereading.',
-    marginalia: 'Pencil underlined, 1954 Vintage edition.',
+    bookTitle: 'Sapiens: A Brief History of Humankind',
+    author: 'Yuval Noah Harari',
+    coverAsset: 'assets/images/sapiens.jpg',
+    text: 'Manusia adalah makhluk yang luar biasa kompleks. Buku ini memberikan wawasan mendalam tentang evolusi dan sejarah umat manusia.',
+    marginalia: 'Penting untuk memahami konteks sejarah agar tidak mengulang kesalahan yang sama.',
   ),
 ];
 
@@ -626,21 +629,37 @@ class _FeedCardState extends State<_FeedCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.menu_book_outlined, size: 16, color: _kBody),
-                const SizedBox(width: 8),
+                _MiniCover(asset: post.coverAsset, width: 44, height: 66),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    '${post.bookTitle.toUpperCase()} · ${post.author.toUpperCase()}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: _kSans,
-                      fontSize: 10.5, // was 12
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.6,
-                      color: _kBody,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.bookTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kInk,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        post.author,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 10.5,
+                          color: _kBody,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 GestureDetector(
@@ -692,16 +711,18 @@ class _FeedCardState extends State<_FeedCard> {
 // ─────────────────────── Komponen kecil ───────────────────────
 class _MiniCover extends StatelessWidget {
   final String? asset;
+  final double width;
+  final double height;
 
-  const _MiniCover({this.asset});
+  const _MiniCover({this.asset, this.width = 58, this.height = 88});
 
   @override
   Widget build(BuildContext context) {
     final placeholder = Container(color: Colors.white);
 
     return Container(
-      width: 58,
-      height: 88,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
         boxShadow: [
