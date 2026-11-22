@@ -237,11 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
-                  _menuItem(
-                    Icons.format_quote_rounded,
-                    'Add Quote',
-                    _onAddQuote,
-                  ),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
                 ],
               ),

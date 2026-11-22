@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_theme.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 
 /// Label di atas field. small = true untuk gaya "EMAIL" (kapital kecil).
 class FieldLabel extends StatelessWidget {
@@ -57,8 +59,13 @@ class OrDivider extends StatelessWidget {
 
 /// Tombol Google abu muda dengan logo
 class GoogleButton extends StatelessWidget {
-  const GoogleButton({super.key, required this.onPressed});
+  const GoogleButton({
+    super.key,
+    required this.onPressed,
+    this.isLoading = false,
+  });
   final VoidCallback onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -67,15 +74,24 @@ class GoogleButton extends StatelessWidget {
         backgroundColor: AppTheme.fieldColor,
         foregroundColor: Colors.black,
       ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/images/google_logo.png', height: 18),
-          const SizedBox(width: 8),
-          const Text('Google'),
-        ],
-      ),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.black87,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/images/google_logo.png', height: 18),
+                const SizedBox(width: 8),
+                const Text('Google'),
+              ],
+            ),
     );
   }
 }

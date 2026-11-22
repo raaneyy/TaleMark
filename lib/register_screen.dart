@@ -1,5 +1,7 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'home.dart';
 import 'app_theme.dart';
+import 'services/auth_services.dart';
 import 'widgets/auth_widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -17,9 +19,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Variabel untuk visibilitas sandi
+  // Variabel untuk visibilitas sandi & status loading
   bool _obscure = true;
   bool _hasMinLength = false;
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -27,6 +31,111 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (_isLoading) return;
+    if (!formKey.currentState!.validate()) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await AuthService.register(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      final userName = result['user']?['name'] ?? _nameController.text.trim();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Akun berhasil dibuat! Selamat datang, $userName.'),
+          backgroundColor: Colors.black87,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      String message = e.toString().replaceFirst('Exception: ', '');
+      if (message.contains('Api10') || message.contains('ApiException: 10')) {
+        message = 'Google Sign-In ditolak (Error 10). Tunggu 3–5 menit hingga Google Cloud tersinkron atau restart aplikasi/HP.';
+      } else if (message.contains('12500')) {
+        message = 'Periksa OAuth Consent Screen atau tambahkan email Anda ke Test Users di Google Cloud Console.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    if (_isLoading || _isGoogleLoading) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final result = await AuthService.loginWithGoogle();
+
+      if (!mounted) return;
+
+      final userName = result['user']?['name'] ?? 'Pembaca';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Akun Google terhubung! Selamat datang, $userName.'),
+          backgroundColor: Colors.black87,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      String message = e.toString().replaceFirst('Exception: ', '');
+      if (message.contains('Api10') || message.contains('ApiException: 10')) {
+        message = 'Google Sign-In ditolak (Error 10). Tunggu 3–5 menit hingga Google Cloud tersinkron atau restart aplikasi/HP.';
+      } else if (message.contains('12500')) {
+        message = 'Periksa OAuth Consent Screen atau tambahkan email Anda ke Test Users di Google Cloud Console.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
   }
 
   @override
@@ -148,13 +257,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 20),
 
                   ElevatedButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        // TODO: Jalankan fungsi registrasi ke backend
-                        debugPrint('Register: ${_nameController.text.trim()}, ${_emailController.text.trim()}');
-                      }
-                    },
-                    child: const Text('Buat Akun TaleMark →'),
+                    onPressed: _isLoading ? null : _handleRegister,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Buat Akun TaleMark →'),
                   ),
                   const SizedBox(height: 20),
 
@@ -162,9 +275,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 20),
 
                   GoogleButton(
-                    onPressed: () {
-                      // TODO: daftar dengan Google
-                    },
+                    onPressed: _handleGoogleLogin,
+                    isLoading: _isGoogleLoading,
                   ),
                   const SizedBox(height: 20),
 

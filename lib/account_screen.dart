@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'login_screen.dart';
+import 'services/auth_services.dart';
 import 'widgets/setting_screen.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
@@ -149,30 +150,38 @@ class _ProfileCard extends StatelessWidget {
             children: [
               const _Avatar(size: 56, showBadge: true),
               const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _kName,
-                      style: TextStyle(
-                        fontFamily: _kSerif,
-                        fontSize: 22, // was 28
-                        fontWeight: FontWeight.w500,
-                        color: _kInk,
-                        height: 1.1,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      _kHandle,
-                      style: TextStyle(
-                        fontFamily: _kSans,
-                        fontSize: 12.5, // was 14
-                        color: _kMuted,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: FutureBuilder<String?>(
+                  future: AuthService.getUserName(),
+                  builder: (context, snapshot) {
+                    final displayName = (snapshot.data != null && snapshot.data!.isNotEmpty)
+                        ? snapshot.data!
+                        : _kName;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontFamily: _kSerif,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
+                            color: _kInk,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          _kHandle,
+                          style: TextStyle(
+                            fontFamily: _kSans,
+                            fontSize: 12.5,
+                            color: _kMuted,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               Stack(
@@ -206,7 +215,10 @@ class _ProfileCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => SettingsScreen(
-                        onLogout: () {
+                        onLogout: () async {
+                          // Logout dari backend & hapus token dari storage
+                          await AuthService.logout();
+                          if (!context.mounted) return;
                           // Keluar: buka halaman Login dan hapus semua halaman sebelumnya
                           Navigator.pushAndRemoveUntil(
                             context,

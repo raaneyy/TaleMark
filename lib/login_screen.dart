@@ -2,27 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:tale_mark/home.dart';
 import 'register_screen.dart';
 import 'app_theme.dart';
+import 'services/auth_services.dart';
 import 'widgets/auth_widgets.dart';
 import 'widgets/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key}); // Konstruktor gaya baru
+  const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState(); // Tipe createState baru
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  
-  // Tambahan Controller
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Variabel untuk visibilitas sandi
   bool _obscure = true;
+  bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
-  // Wajib menambahkan dispose untuk mencegah memory leak
   @override
   void dispose() {
     _emailController.dispose();
@@ -30,19 +30,120 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _handleLogin() async {
+    if (_isLoading) return;
+    if (!formKey.currentState!.validate()) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await AuthService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      final userName = result['user']?['name'] ?? 'Pembaca';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Selamat datang kembali, $userName!'),
+          backgroundColor: Colors.black87,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      String message = e.toString().replaceFirst('Exception: ', '');
+      if (message.contains('Api10') || message.contains('ApiException: 10')) {
+        message = 'Google Sign-In ditolak (Error 10). Tunggu 3–5 menit hingga Google Cloud tersinkron atau restart aplikasi/HP.';
+      } else if (message.contains('12500')) {
+        message = 'Periksa OAuth Consent Screen atau tambahkan email Anda ke Test Users di Google Cloud Console.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // Fungsi untuk menangani login Google
+  Future<void> _handleGoogleLogin() async {
+    if (_isLoading || _isGoogleLoading) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final result = await AuthService.loginWithGoogle();
+
+      if (!mounted) return;
+
+      final userName = result['user']?['name'] ?? 'Pembaca';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Selamat datang, $userName!'),
+          backgroundColor: Colors.black87,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      String message = e.toString().replaceFirst('Exception: ', '');
+      if (message.contains('Api10') || message.contains('ApiException: 10')) {
+        message = 'Google Sign-In ditolak (Error 10). Tunggu 3–5 menit hingga Google Cloud tersinkron atau restart aplikasi/HP.';
+      } else if (message.contains('12500')) {
+        message = 'Periksa OAuth Consent Screen atau tambahkan email Anda ke Test Users di Google Cloud Console.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        // Perbaikan 1: Membungkus dengan SingleChildScrollView
-        child: SingleChildScrollView( 
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(32.0),
           child: Form(
             key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              // mainAxisAlignment: MainAxisAlignment.center dihapus karena di dalam scroll
               children: <Widget>[
                 const SizedBox(height: 40),
                 Text(
@@ -109,28 +210,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 24),
 
                 ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      // TODO: kirim data ke backend untuk autentikasi
-                      debugPrint('Login: ${_emailController.text.trim()}');
-                      
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
-                      );
-                    }
-                  },
-                  child: const Text('Masuk'),
+                  onPressed: _isLoading ? null : _handleLogin,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Masuk'),
                 ),
                 const SizedBox(height: 24),
 
                 const OrDivider('ATAU'),
                 const SizedBox(height: 24),
 
+                // Tombol Google sudah dihubungkan ke _handleGoogleLogin
                 GoogleButton(
-                  onPressed: () {
-                    // TODO: login dengan Google
-                  },
+                  onPressed: _handleGoogleLogin,
+                  isLoading: _isGoogleLoading,
                 ),
                 const SizedBox(height: 40),
 

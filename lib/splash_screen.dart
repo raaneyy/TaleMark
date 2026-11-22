@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'home.dart';
 import 'login_screen.dart';
+import 'services/auth_services.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,19 +40,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to login after 2.8 seconds
-    Future.delayed(const Duration(milliseconds: 2800), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 600),
-            pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          ),
-        );
-      }
+    // Navigate to home if already logged in, otherwise login after 2.8 seconds
+    Future.delayed(const Duration(milliseconds: 2800), () async {
+      if (!mounted) return;
+      final loggedIn = await AuthService.isLoggedIn();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 600),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              loggedIn ? const HomeScreen() : const LoginScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
     });
   }
 
