@@ -10,7 +10,7 @@ class AuthService {
   // Ganti IP ini sesuai alamat IP host server backend Anda
   // Untuk Android Emulator biasanya: http://10.0.2.2:8000/api
   // Untuk HP fisik / jaringan Wi-Fi lokal: http://192.168.1.6:8000/api atau http://10.177.231.149:8000/api
-  static const String baseUrl = 'http://192.168.1.6:8000/api';
+  static const String baseUrl = 'http://10.95.233.149:8000/api';
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
