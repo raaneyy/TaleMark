@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Aplikasi TaleMark membutuhkan akses kamera untuk memindai barcode/ISBN buku.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Aplikasi TaleMark membutuhkan akses galeri untuk memindai gambar barcode buku.</string>
 </dict>
 </plist>
