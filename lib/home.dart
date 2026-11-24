@@ -7,6 +7,7 @@ import 'library_screen.dart';
 import 'feed.dart';
 import 'widgets/statistik.dart';
 import 'account_screen.dart';
+import 'kutipan_favorit_screen.dart';
 
 void main() => runApp(const TaleMarkApp());
 
@@ -81,15 +82,15 @@ const kaftaPicks = [
     match: 98,
   ),
   Book(
-    title: 'Hujan',
-    author: 'Tere Liye',
+    title: 'The Stranger',
+    author: 'Albert Camus',
     rating: 4.5,
     pages: 123,
     match: 94,
   ),
   Book(
-    title: 'Hujan',
-    author: 'Tere Liye',
+    title: 'Blindness',
+    author: 'José Saramago',
     rating: 4.2,
     pages: 352,
     match: 91,
@@ -175,6 +176,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openKutipan() {
+    _closeMenu();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const KutipanFavoritScreen()),
+    );
+  }
+
   Widget _menuItem(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -221,8 +230,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _menuItem(Icons.qr_code_scanner, 'Scan Barcode', _openScanner),
                   _menuItem(Icons.book, 'Add Book', _onAddBook),
                   _menuItem(Icons.schedule, 'Set Timer', _onSetTimer),
+                  _menuItem(Icons.format_quote_rounded, 'Kutipan', _openKutipan),
                 ],
               ),
             ),

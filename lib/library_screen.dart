@@ -71,8 +71,17 @@ class BookModel {
 class BookQuote {
   final String label; // contoh: 'ENDING'
   final String text;
+  final bool isFavorite;
 
-  const BookQuote({required this.label, required this.text});
+  const BookQuote({required this.label, required this.text, this.isFavorite = false});
+
+  BookQuote copyWith({String? label, String? text, bool? isFavorite}) {
+    return BookQuote(
+      label: label ?? this.label,
+      text: text ?? this.text,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
 }
 
 const _hujanQuotes = [

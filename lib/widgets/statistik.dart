@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../kutipan_favorit_screen.dart';
 
 // ─────────────────────── Konstanta desain ───────────────────────
 const _kBg = Color(0xFFFAFAF8);
@@ -142,6 +143,8 @@ class _StatsScreenState extends State<StatsScreen> {
             const _StreakCard(),
             const SizedBox(height: 14),
             const _SummaryGrid(),
+            const SizedBox(height: 22),
+            const _WeeklyRecapCard(),
             const SizedBox(height: 22),
             const _FavoriteBooksCard(),
             const SizedBox(height: 22),
@@ -479,6 +482,189 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
+// ─────────────────────── Rekap Mingguan ───────────────────────
+class _WeeklyRecapCard extends StatelessWidget {
+  const _WeeklyRecapCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.calendar_today_rounded, size: 16, color: _kInk),
+              SizedBox(width: 8),
+              Text(
+                'Rekap Mingguan',
+                style: TextStyle(
+                  fontFamily: _kSerif,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w500,
+                  color: _kInk,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            '18 Nov – 24 Nov 2026',
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 12,
+              color: _kMuted,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Weekly stats row
+          Row(
+            children: [
+              _recapStat('Buku Dibaca', '3', Icons.menu_book_outlined),
+              const SizedBox(width: 12),
+              _recapStat('Halaman', '247', Icons.description_outlined),
+              const SizedBox(width: 12),
+              _recapStat('Waktu Baca', '4.5 jam', Icons.timer_outlined),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Daily reading bar chart
+          const Text(
+            'AKTIVITAS HARIAN',
+            style: TextStyle(
+              fontFamily: _kSans,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.1,
+              color: _kBody,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 60,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _dayBar('Sen', 0.6),
+                _dayBar('Sel', 0.9),
+                _dayBar('Rab', 0.3),
+                _dayBar('Kam', 0.7),
+                _dayBar('Jum', 1.0),
+                _dayBar('Sab', 0.5),
+                _dayBar('Min', 0.8),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Summary text
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _kInset,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.emoji_events_outlined, size: 18, color: _kInk),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Kamu membaca 15% lebih banyak dari minggu lalu. Terus semangat! 🎉',
+                    style: TextStyle(
+                      fontFamily: _kSans,
+                      fontSize: 13,
+                      height: 1.4,
+                      color: _kBody,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _recapStat(String label, String value, IconData icon) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: _kInset,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 18, color: _kInk),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: const TextStyle(
+                fontFamily: _kSerif,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: _kInk,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(
+                fontFamily: _kSans,
+                fontSize: 11,
+                color: _kMuted,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Widget _dayBar(String day, double value) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: FractionallySizedBox(
+                  heightFactor: value.clamp(0.05, 1.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _kInk,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              day,
+              style: const TextStyle(
+                fontFamily: _kSans,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: _kMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─────────────────────── Favorite books ───────────────────────
 class _FavoriteBooksCard extends StatelessWidget {
   const _FavoriteBooksCard();
@@ -492,16 +678,46 @@ class _FavoriteBooksCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              'Favorite Books',
-              style: TextStyle(
-                fontFamily: _kSerif,
-                fontSize: 19,
-                fontWeight: FontWeight.w500,
-                color: _kInk,
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Favorite Books',
+                    style: TextStyle(
+                      fontFamily: _kSerif,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w500,
+                      color: _kInk,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const KutipanFavoritScreen()),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.format_quote_rounded, size: 16, color: _kBody),
+                      SizedBox(width: 4),
+                      Text(
+                        'Kutipan',
+                        style: TextStyle(
+                          fontFamily: _kSans,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: _kBody,
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.chevron_right_rounded, size: 16, color: _kBody),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

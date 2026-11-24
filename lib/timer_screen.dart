@@ -209,7 +209,10 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(), // tombol back yang panah itu bakal muncul otomatis
+      appBar: AppBar(
+        title: const Text('Timer Membaca', style: TextStyle(fontFamily: 'Georgia', fontSize: 20, fontWeight: FontWeight.w600)),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -218,7 +221,9 @@ class _TimerScreenState extends State<TimerScreen> {
               _infoBacaan(),
               const SizedBox(height: 60),
               _lingkaranTimer(),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+              _presetDurasi(),
+              const SizedBox(height: 30),
               _tombolKontrol(),
               const SizedBox(height: 40),
               _kartuProgres(),
@@ -318,6 +323,44 @@ class _TimerScreenState extends State<TimerScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // Preset durasi cepat
+  Widget _presetDurasi() {
+    const presets = [15, 25, 30, 45, 60];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (final m in presets) ...[
+          GestureDetector(
+            onTap: sedangBerjalan
+                ? null
+                : () {
+                    setState(() {
+                      targetMenit = m;
+                      sisaDetik = m * 60;
+                    });
+                  },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: targetMenit == m ? Colors.black : AppTheme.fieldColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${m}m',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: targetMenit == m ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+          ),
+          if (m != presets.last) const SizedBox(width: 8),
+        ],
+      ],
     );
   }
 

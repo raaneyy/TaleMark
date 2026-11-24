@@ -881,12 +881,22 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
 
     return [
-      for (final q in _quotes)
+      for (int i = 0; i < _quotes.length; i++)
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: _QuoteCard(
-            quote: q,
+            quote: _quotes[i],
             onPost: () => _snack('Fitur posting belum tersedia'),
+            onToggleFavorite: () {
+              setState(() {
+                _quotes[i] = _quotes[i].copyWith(
+                  isFavorite: !_quotes[i].isFavorite,
+                );
+              });
+              _snack(_quotes[i].isFavorite
+                  ? 'Kutipan ditandai sebagai favorit ⭐'
+                  : 'Kutipan dihapus dari favorit');
+            },
           ),
         ),
     ];
@@ -897,8 +907,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 class _QuoteCard extends StatelessWidget {
   final BookQuote quote;
   final VoidCallback onPost;
+  final VoidCallback? onToggleFavorite;
 
-  const _QuoteCard({required this.quote, required this.onPost});
+  const _QuoteCard({required this.quote, required this.onPost, this.onToggleFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -921,6 +932,15 @@ class _QuoteCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              GestureDetector(
+                onTap: onToggleFavorite,
+                child: Icon(
+                  quote.isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
+                  size: 22,
+                  color: quote.isFavorite ? const Color(0xFFFFA726) : _kBody,
+                ),
+              ),
+              const SizedBox(width: 8),
               const Icon(
                 Icons.bookmark_added_outlined,
                 size: 20,
